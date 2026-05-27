@@ -29,6 +29,25 @@ void drawBoard() {
     mvprintw(BOARD_Y + BOARD_HEIGHT, BOARD_X - 1, "+--------------------+");
 }
 
+// Draw the stats panel to the left of the board
+void drawStats(int score, int lines, int level) {
+    int statsX = BOARD_X - 14;
+    int statsY = BOARD_Y;
+
+    mvprintw(statsY, statsX, "+----------+");
+    mvprintw(statsY + 1, statsX, "|  STATS   |");
+    mvprintw(statsY + 2, statsX, "+----------+");
+    mvprintw(statsY + 3, statsX, "| Score    |");
+    mvprintw(statsY + 4, statsX, "| %-8d |", score);
+    mvprintw(statsY + 5, statsX, "+----------+");
+    mvprintw(statsY + 6, statsX, "| Lines    |");
+    mvprintw(statsY + 7, statsX, "| %-8d |", lines);
+    mvprintw(statsY + 8, statsX, "+----------+");
+    mvprintw(statsY + 9, statsX, "| Level    |");
+    mvprintw(statsY + 10, statsX, "| %-8d |", level);
+    mvprintw(statsY + 11, statsX, "+----------+");
+}
+
 int main() {
     // Initialize PDCurses
     initscr();
@@ -42,8 +61,9 @@ int main() {
     BOARD_X = (termWidth / 2) - BOARD_WIDTH;
     BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
 
-    // Draw the board
+    // Draw the board and stats
     drawBoard();
+    drawStats(0, 0, 0);
     refresh();
 
     // Wait for keypress then exit
