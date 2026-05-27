@@ -4,9 +4,9 @@
 const int BOARD_WIDTH = 10;
 const int BOARD_HEIGHT = 20;
 
-// Board offset on screen (where to draw it)
-const int BOARD_X = 12;
-const int BOARD_Y = 1;
+// Board offset
+int BOARD_X = 12;
+int BOARD_Y = 1;
 
 // The game board
 int board[BOARD_HEIGHT][BOARD_WIDTH] = { 0 };
@@ -35,6 +35,12 @@ int main() {
     noecho();
     curs_set(0);
     keypad(stdscr, TRUE);
+
+    // Get terminal size and center the board
+    int termHeight, termWidth;
+    getmaxyx(stdscr, termHeight, termWidth);
+    BOARD_X = (termWidth / 2) - BOARD_WIDTH;
+    BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
 
     // Draw the board
     drawBoard();
