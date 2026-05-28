@@ -11,6 +11,65 @@ int BOARD_Y = 1;
 // The game board
 int board[BOARD_HEIGHT][BOARD_WIDTH] = { 0 };
 
+// The 7 tetromino shapes
+// 1 = block, 0 = empty
+const int TETROMINOES[7][4][4] = {
+    // I piece
+    {
+        {0, 0, 0, 0},
+        {1, 1, 1, 1},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    // O piece
+    {
+        {0, 0, 0, 0},
+        {0, 1, 1, 0},
+        {0, 1, 1, 0},
+        {0, 0, 0, 0}
+    },
+    // T piece
+    {
+        {0, 0, 0, 0},
+        {0, 1, 0, 0},
+        {1, 1, 1, 0},
+        {0, 0, 0, 0}
+    },
+    // S piece
+    {
+        {0, 0, 0, 0},
+        {0, 1, 1, 0},
+        {1, 1, 0, 0},
+        {0, 0, 0, 0}
+    },
+    // Z piece
+    {
+        {0, 0, 0, 0},
+        {1, 1, 0, 0},
+        {0, 1, 1, 0},
+        {0, 0, 0, 0}
+    },
+    // J piece
+    {
+        {0, 0, 0, 0},
+        {1, 0, 0, 0},
+        {1, 1, 1, 0},
+        {0, 0, 0, 0}
+    },
+    // L piece
+    {
+        {0, 0, 0, 0},
+        {0, 0, 1, 0},
+        {1, 1, 1, 0},
+        {0, 0, 0, 0}
+    }
+};
+
+// Current piece state
+int currentPiece = 0;
+int currentX = 3;
+int currentY = 0;
+
 // Draw the empty board border and grid
 void drawBoard() {
     // Draw top border
