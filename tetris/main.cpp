@@ -107,6 +107,19 @@ void drawStats(int score, int lines, int level) {
     mvprintw(statsY + 11, statsX, "+----------+");
 }
 
+// Draw the current falling piece on the board
+void drawPiece() {
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (TETROMINOES[currentPiece][y][x] == 1) {
+                int screenX = BOARD_X + (currentX + x) * 2;
+                int screenY = BOARD_Y + currentY + y;
+                mvprintw(screenY, screenX, "[]");
+            }
+        }
+    }
+}
+
 int main() {
     // Initialize PDCurses
     initscr();
@@ -122,6 +135,7 @@ int main() {
 
     // Draw the board and stats
     drawBoard();
+    drawPiece();
     drawStats(0, 0, 0);
     refresh();
 
