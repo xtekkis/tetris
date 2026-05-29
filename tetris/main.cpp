@@ -107,6 +107,26 @@ void drawStats(int score, int lines, int level) {
     mvprintw(statsY + 11, statsX, "+----------+");
 }
 
+// Check if the piece can move to the given position
+bool isValidPosition(int piece, int posX, int posY) {
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (TETROMINOES[piece][y][x] == 1) {
+                int newX = posX + x;
+                int newY = posY + y;
+
+                // Check boundaries
+                if (newX < 0 || newX >= BOARD_WIDTH) return false;
+                if (newY >= BOARD_HEIGHT) return false;
+
+                // Check if cell is already occupied
+                if (newY >= 0 && board[newY][newX] == 1) return false;
+            }
+        }
+    }
+    return true;
+}
+
 // Draw the current falling piece on the board
 void drawPiece() {
     for (int y = 0; y < 4; y++) {
