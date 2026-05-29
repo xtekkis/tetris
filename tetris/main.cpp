@@ -1,4 +1,5 @@
 #include <curses.h>
+#include <cstdlib>
 
 // Board dimensions
 const int BOARD_WIDTH = 10;
@@ -146,6 +147,7 @@ int main() {
     noecho();
     curs_set(0);
     keypad(stdscr, TRUE);
+    timeout(100);
 
     // Get terminal size and center the board
     int termHeight, termWidth;
@@ -153,14 +155,44 @@ int main() {
     BOARD_X = (termWidth / 2) - BOARD_WIDTH;
     BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
 
-    // Draw the board and stats
-    drawBoard();
-    drawPiece();
-    drawStats(0, 0, 0);
-    refresh();
+    // Game state
+    int score = 0;
+    int lines = 0;
+    int level = 1;
+    bool gameOver = false;
 
-    // Wait for keypress then exit
-    getch();
+    while (!gameOver) {
+        // Draw everything
+        clear();
+        drawBoard();
+        drawPiece();
+        drawStats(score, lines, level);
+        refresh();
+
+        // Handle input
+        int key = getch();
+
+        //27 is the Escape key
+        if (key == 27) {
+            break;
+        }
+        else if (key == 'a') {
+            if (isValidPosition(currentPiece, currentX - 1, currentY)) {
+                currentX--;
+            }
+        }
+        else if (key == 'd') {
+            if (isValidPosition(currentPiece, currentX + 1, currentY)) {
+                currentX++;
+            }
+        }
+        else if (key == 's') {
+            if (isValidPosition(currentPiece, currentX, currentY + 1)) {
+                currentY++;
+            }
+        }
+    }
+
     endwin();
     return 0;
 }
