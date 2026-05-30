@@ -146,6 +146,42 @@ void drawPiece() {
     }
 }
 
+// Check for and clear completed lines
+int clearLines() {
+    int linesCleared = 0;
+
+    for (int y = BOARD_HEIGHT - 1; y >= 0; y--) {
+        // Check if row is full
+        bool full = true;
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            if (board[y][x] == 0) {
+                full = false;
+                break;
+            }
+        }
+
+        if (full) {
+            linesCleared++;
+
+            // Shift everything above down
+            for (int row = y; row > 0; row--) {
+                for (int x = 0; x < BOARD_WIDTH; x++) {
+                    board[row][x] = board[row - 1][x];
+                }
+            }
+
+            // Clear top row
+            for (int x = 0; x < BOARD_WIDTH; x++) {
+                board[0][x] = 0;
+            }
+
+            // Check the same row again since rows shifted down
+            y++;
+        }
+    }
+    return linesCleared;
+}
+
 int main() {
     // Initialize PDCurses
     initscr();
@@ -201,6 +237,13 @@ int main() {
                     gameOver = true;
                 }
             }
+        }
+
+        // Clear completed lines and update score
+        int cleared = clearLines();
+        if (cleared > 0) {
+            lines += cleared;
+            score += cleared * 100 * level;
         }
 
         // Handle input
