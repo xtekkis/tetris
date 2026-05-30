@@ -76,11 +76,16 @@ void drawBoard() {
     // Draw top border
     mvprintw(BOARD_Y - 1, BOARD_X - 1, "+--------------------+");
 
-    // Draw sides and empty cells
+    // Draw sides and cells
     for (int y = 0; y < BOARD_HEIGHT; y++) {
         mvprintw(BOARD_Y + y, BOARD_X - 1, "|");
         for (int x = 0; x < BOARD_WIDTH; x++) {
-            mvprintw(BOARD_Y + y, BOARD_X + x * 2, ". ");
+            if (board[y][x] == 1) {
+                mvprintw(BOARD_Y + y, BOARD_X + x * 2, "[]");
+            }
+            else {
+                mvprintw(BOARD_Y + y, BOARD_X + x * 2, ". ");
+            }
         }
         mvprintw(BOARD_Y + y, BOARD_X + BOARD_WIDTH * 2, "|");
     }
@@ -168,6 +173,35 @@ int main() {
         drawPiece();
         drawStats(score, lines, level);
         refresh();
+
+        // Auto drop
+        static int dropCounter = 0;
+        dropCounter++;
+        if (dropCounter >= 5) {
+            dropCounter = 0;
+            if (isValidPosition(currentPiece, currentX, currentY + 1)) {
+                currentY++;
+            }
+            else {
+                // Place piece on board
+                for (int y = 0; y < 4; y++) {
+                    for (int x = 0; x < 4; x++) {
+                        if (TETROMINOES[currentPiece][y][x] == 1) {
+                            board[currentY + y][currentX + x] = 1;
+                        }
+                    }
+                }
+                // Spawn new piece
+                currentPiece = rand() % 7;
+                currentX = 3;
+                currentY = 0;
+
+                // Check game over
+                if (!isValidPosition(currentPiece, currentX, currentY)) {
+                    gameOver = true;
+                }
+            }
+        }
 
         // Handle input
         int key = getch();
