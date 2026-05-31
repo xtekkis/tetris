@@ -71,7 +71,19 @@ int currentPiece = 0;
 int currentX = 3;
 int currentY = 0;
 
-// Draw the empty board border and grid
+// Active piece shape
+int currentShape[4][4];
+
+// Copy a tetromino into the active shape
+void loadPiece(int piece) {
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            currentShape[y][x] = TETROMINOES[piece][y][x];
+        }
+    }
+}
+
+// Draw the board border and cells
 void drawBoard() {
     // Draw top border
     mvprintw(BOARD_Y - 1, BOARD_X - 1, "+--------------------+");
@@ -113,11 +125,11 @@ void drawStats(int score, int lines, int level) {
     mvprintw(statsY + 11, statsX, "+----------+");
 }
 
-// Check if the piece can move to the given position
-bool isValidPosition(int piece, int posX, int posY) {
+// Check if the current shape can be at the given position
+bool isValidPosition(int posX, int posY) {
     for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
-            if (TETROMINOES[piece][y][x] == 1) {
+            if (currentShape[y][x] == 1) {
                 int newX = posX + x;
                 int newY = posY + y;
 
@@ -133,11 +145,11 @@ bool isValidPosition(int piece, int posX, int posY) {
     return true;
 }
 
-// Draw the current falling piece on the board
+// Draw the current falling piece
 void drawPiece() {
     for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
-            if (TETROMINOES[currentPiece][y][x] == 1) {
+            if (currentShape[y][x] == 1) {
                 int screenX = BOARD_X + (currentX + x) * 2;
                 int screenY = BOARD_Y + currentY + y;
                 mvprintw(screenY, screenX, "[]");
@@ -151,7 +163,6 @@ int clearLines() {
     int linesCleared = 0;
 
     for (int y = BOARD_HEIGHT - 1; y >= 0; y--) {
-        // Check if row is full
         bool full = true;
         for (int x = 0; x < BOARD_WIDTH; x++) {
             if (board[y][x] == 0) {
@@ -175,11 +186,40 @@ int clearLines() {
                 board[0][x] = 0;
             }
 
-            // Check the same row again since rows shifted down
             y++;
         }
     }
     return linesCleared;
+}
+
+// Rotate the current shape 90 degrees clockwise
+void rotatePiece() {
+    int temp[4][4] = { 0 };
+
+    // Transpose and reverse to rotate clockwise
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            temp[x][3 - y] = currentShape[y][x];
+        }
+    }
+
+    // Only apply if valid position
+    int backupShape[4][4];
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            backupShape[y][x] = currentShape[y][x];
+            currentShape[y][x] = temp[y][x];
+        }
+    }
+
+    // If not valid revert
+    if (!isValidPosition(currentX, currentY)) {
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                currentShape[y][x] = backupShape[y][x];
+            }
+        }
+    }
 }
 
 int main() {
@@ -202,6 +242,9 @@ int main() {
     int level = 1;
     bool gameOver = false;
 
+    // Load the first piece
+    loadPiece(currentPiece);
+
     while (!gameOver) {
         // Draw everything
         clear();
@@ -215,61 +258,70 @@ int main() {
         dropCounter++;
         if (dropCounter >= 5) {
             dropCounter = 0;
-            if (isValidPosition(currentPiece, currentX, currentY + 1)) {
+            if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
             }
             else {
                 // Place piece on board
                 for (int y = 0; y < 4; y++) {
                     for (int x = 0; x < 4; x++) {
-                        if (TETROMINOES[currentPiece][y][x] == 1) {
+                        if (currentShape[y][x] == 1) {
                             board[currentY + y][currentX + x] = 1;
                         }
                     }
                 }
+
+                // Clear completed lines and update score
+                int cleared = clearLines();
+                if (cleared > 0) {
+                    lines += cleared;
+                    score += cleared * 100 * level;
+                }
+
                 // Spawn new piece
                 currentPiece = rand() % 7;
                 currentX = 3;
                 currentY = 0;
+                loadPiece(currentPiece);
 
                 // Check game over
-                if (!isValidPosition(currentPiece, currentX, currentY)) {
+                if (!isValidPosition(currentX, currentY)) {
                     gameOver = true;
                 }
             }
         }
 
-        // Clear completed lines and update score
-        int cleared = clearLines();
-        if (cleared > 0) {
-            lines += cleared;
-            score += cleared * 100 * level;
-        }
-
         // Handle input
         int key = getch();
 
-        //27 is the Escape key
+        // 27 is the Escape key
         if (key == 27) {
             break;
         }
         else if (key == 'a') {
-            if (isValidPosition(currentPiece, currentX - 1, currentY)) {
+            if (isValidPosition(currentX - 1, currentY)) {
                 currentX--;
             }
         }
         else if (key == 'd') {
-            if (isValidPosition(currentPiece, currentX + 1, currentY)) {
+            if (isValidPosition(currentX + 1, currentY)) {
                 currentX++;
             }
         }
         else if (key == 's') {
-            if (isValidPosition(currentPiece, currentX, currentY + 1)) {
+            if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
             }
         }
+        else if (key == 'e') {
+            rotatePiece();
+        }
     }
 
+    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X, "  GAME OVER!  ");
+    refresh();
+    timeout(-1);
+    getch();
     endwin();
     return 0;
 }
