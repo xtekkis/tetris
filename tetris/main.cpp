@@ -275,7 +275,11 @@ int main() {
                 int cleared = clearLines();
                 if (cleared > 0) {
                     lines += cleared;
-                    score += cleared * 100 * level;
+                    // Reward multi-line clears more
+                    if (cleared == 1) score += 100 * level;
+                    else if (cleared == 2) score += 300 * level;
+                    else if (cleared == 3) score += 500 * level;
+                    else if (cleared == 4) score += 800 * level;
                 }
 
                 // Spawn new piece
