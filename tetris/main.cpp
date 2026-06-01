@@ -200,6 +200,29 @@ void drawPiece() {
     }
 }
 
+// Draw ghost piece showing where current piece will land
+void drawGhost() {
+    // Find how far down the piece can fall
+    int ghostY = currentY;
+    while (isValidPosition(currentX, ghostY + 1)) {
+        ghostY++;
+    }
+
+    // Only draw if ghost is different from current position
+    if (ghostY == currentY) return;
+
+    // Draw ghost with different character
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (currentShape[y][x] == 1) {
+                int screenX = BOARD_X + (currentX + x) * 2;
+                int screenY = BOARD_Y + ghostY + y;
+                mvprintw(screenY, screenX, "::");
+            }
+        }
+    }
+}
+
 // Check for and clear completed lines
 int clearLines() {
     int linesCleared = 0;
@@ -270,7 +293,7 @@ int main() {
     noecho();
     curs_set(0);
     keypad(stdscr, TRUE);
-    timeout(100);
+    timeout(50);
 
     // Get terminal size and center the board
     int termHeight, termWidth;
@@ -294,6 +317,7 @@ int main() {
         // Draw everything
         clear();
         drawBoard();
+        drawGhost();
         drawPiece();
         drawStats(score, lines, level);
         drawNextPiece();
@@ -329,7 +353,7 @@ int main() {
         // Auto drop after input
         static int dropCounter = 0;
         dropCounter++;
-        if (dropCounter >= 5) {
+        if (dropCounter >= 10) {
             dropCounter = 0;
             if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
