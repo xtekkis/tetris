@@ -68,6 +68,7 @@ const int TETROMINOES[7][4][4] = {
 
 // Current piece state
 int currentPiece = 0;
+int nextPiece = 0;
 int currentX = 3;
 int currentY = 0;
 
@@ -123,6 +124,31 @@ void drawStats(int score, int lines, int level) {
     mvprintw(statsY + 9, statsX, "| Level    |");
     mvprintw(statsY + 10, statsX, "| %-8d |", level);
     mvprintw(statsY + 11, statsX, "+----------+");
+}
+
+// Draw the next piece preview panel
+void drawNextPiece() {
+    int previewX = BOARD_X + BOARD_WIDTH * 2 + 4;
+    int previewY = BOARD_Y;
+
+    mvprintw(previewY, previewX, "+--------+");
+    mvprintw(previewY + 1, previewX, "|  NEXT  |");
+    mvprintw(previewY + 2, previewX, "+--------+");
+
+    // Draw empty preview area
+    for (int y = 0; y < 4; y++) {
+        mvprintw(previewY + 3 + y, previewX, "|        |");
+    }
+    mvprintw(previewY + 7, previewX, "+--------+");
+
+    // Draw the next piece centered inside the box
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (TETROMINOES[nextPiece][y][x] == 1) {
+                mvprintw(previewY + 3 + y, previewX + 1 + x * 2, "[]");
+            }
+        }
+    }
 }
 
 // Check if the current shape can be at the given position
@@ -242,6 +268,9 @@ int main() {
     int level = 1;
     bool gameOver = false;
 
+    // Initialize next piece
+    nextPiece = rand() % 7;
+
     // Load the first piece
     loadPiece(currentPiece);
 
@@ -251,9 +280,36 @@ int main() {
         drawBoard();
         drawPiece();
         drawStats(score, lines, level);
+        drawNextPiece();
         refresh();
 
-        // Auto drop
+        // Handle input first
+        int key = getch();
+
+        // 27 is the Escape key
+        if (key == 27) {
+            break;
+        }
+        else if (key == 'a') {
+            if (isValidPosition(currentX - 1, currentY)) {
+                currentX--;
+            }
+        }
+        else if (key == 'd') {
+            if (isValidPosition(currentX + 1, currentY)) {
+                currentX++;
+            }
+        }
+        else if (key == 's') {
+            if (isValidPosition(currentX, currentY + 1)) {
+                currentY++;
+            }
+        }
+        else if (key == 'e') {
+            rotatePiece();
+        }
+
+        // Auto drop after input
         static int dropCounter = 0;
         dropCounter++;
         if (dropCounter >= 5) {
@@ -282,11 +338,12 @@ int main() {
                     else if (cleared == 4) score += 800 * level;
                 }
 
-                // Spawn new piece
-                currentPiece = rand() % 7;
+                // Spawn next piece
+                currentPiece = nextPiece;
                 currentX = 3;
                 currentY = 0;
                 loadPiece(currentPiece);
+                nextPiece = rand() % 7;
 
                 // Check game over
                 if (!isValidPosition(currentX, currentY)) {
@@ -322,7 +379,7 @@ int main() {
         }
     }
 
-    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X, "  GAME OVER!  ");
+    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
     refresh();
     timeout(-1);
     getch();
