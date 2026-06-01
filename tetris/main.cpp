@@ -151,6 +151,22 @@ void drawNextPiece() {
     }
 }
 
+// Draw the controls panel below the next piece preview
+void drawControls() {
+    int controlsX = BOARD_X + BOARD_WIDTH * 2 + 4;
+    int controlsY = BOARD_Y + 9;
+
+    mvprintw(controlsY, controlsX, "+-----------+");
+    mvprintw(controlsY + 1, controlsX, "| CONTROLS  |");
+    mvprintw(controlsY + 2, controlsX, "+-----------+");
+    mvprintw(controlsY + 3, controlsX, "| A - Left  |");
+    mvprintw(controlsY + 4, controlsX, "| D - Right |");
+    mvprintw(controlsY + 5, controlsX, "| S - Down  |");
+    mvprintw(controlsY + 6, controlsX, "| W - Rotate|");
+    mvprintw(controlsY + 7, controlsX, "| ESC - Quit|");
+    mvprintw(controlsY + 8, controlsX, "+-----------+");
+}
+
 // Check if the current shape can be at the given position
 bool isValidPosition(int posX, int posY) {
     for (int y = 0; y < 4; y++) {
@@ -281,6 +297,7 @@ int main() {
         drawPiece();
         drawStats(score, lines, level);
         drawNextPiece();
+        drawControls();
         refresh();
 
         // Handle input first
@@ -305,7 +322,7 @@ int main() {
                 currentY++;
             }
         }
-        else if (key == 'e') {
+        else if (key == 'w') {
             rotatePiece();
         }
 
@@ -350,32 +367,6 @@ int main() {
                     gameOver = true;
                 }
             }
-        }
-
-        // Handle input
-        int key = getch();
-
-        // 27 is the Escape key
-        if (key == 27) {
-            break;
-        }
-        else if (key == 'a') {
-            if (isValidPosition(currentX - 1, currentY)) {
-                currentX--;
-            }
-        }
-        else if (key == 'd') {
-            if (isValidPosition(currentX + 1, currentY)) {
-                currentX++;
-            }
-        }
-        else if (key == 's') {
-            if (isValidPosition(currentX, currentY + 1)) {
-                currentY++;
-            }
-        }
-        else if (key == 'e') {
-            rotatePiece();
         }
     }
 
