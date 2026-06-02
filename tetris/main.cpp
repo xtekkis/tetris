@@ -287,13 +287,43 @@ void rotatePiece() {
     }
 }
 
+// Display title screen before the game starts
+void showTitleScreen() {
+    int termHeight, termWidth;
+    getmaxyx(stdscr, termHeight, termWidth);
+    int centerX = termWidth / 2;
+    int centerY = termHeight / 2;
+
+    clear();
+    mvprintw(centerY - 4, centerX - 10, "+-------------------+");
+    mvprintw(centerY - 3, centerX - 10, "|                   |");
+    mvprintw(centerY - 2, centerX - 10, "|      TETRIS       |");
+    mvprintw(centerY - 1, centerX - 10, "|                   |");
+    mvprintw(centerY, centerX - 10, "|   Built with C++  |");
+    mvprintw(centerY + 1, centerX - 10, "|    and PDCurses   |");
+    mvprintw(centerY + 2, centerX - 10, "|                   |");
+    mvprintw(centerY + 3, centerX - 10, "+-------------------+");
+    mvprintw(centerY + 5, centerX - 10, "Press any key to start");
+    refresh();
+
+    // Wait for keypress
+    timeout(-1);
+    getch();
+    timeout(50);
+}
+
 int main() {
     // Initialize PDCurses
     initscr();
+    raw();
     noecho();
     curs_set(0);
     keypad(stdscr, TRUE);
     timeout(50);
+
+    // Show title screen
+    showTitleScreen();
+    
 
     // Get terminal size and center the board
     int termHeight, termWidth;
