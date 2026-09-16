@@ -1,0 +1,9 @@
+# Only tetris/main.cpp is needed to build the image
+.git
+.vs
+Images
+tetris/packages
+tetris/x64
+**/Debug
+**/Release
+*.md
