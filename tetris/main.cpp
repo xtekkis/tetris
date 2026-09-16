@@ -1,6 +1,7 @@
 #include <curses.h>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 
 // Board dimensions
 const int BOARD_WIDTH = 10;
@@ -75,6 +76,12 @@ int currentY = 0;
 
 // Active piece shape
 int currentShape[4][4];
+
+// Get the current time in milliseconds
+long long getTimeMs() {
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
+}
 
 // Copy a tetromino into the active shape
 void loadPiece(int piece) {
@@ -338,6 +345,10 @@ int main() {
     int level = 1;
     bool gameOver = false;
 
+    // Time in milliseconds between automatic drops
+    const int DROP_INTERVAL_MS = 500;
+    long long lastDropTime = getTimeMs();
+
     // Seed the random generator so each game has a different piece order
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -385,11 +396,10 @@ int main() {
             rotatePiece();
         }
 
-        // Auto drop after input
-        static int dropCounter = 0;
-        dropCounter++;
-        if (dropCounter >= 10) {
-            dropCounter = 0;
+        // Auto drop once enough time has passed, no matter how many keys were pressed
+        long long now = getTimeMs();
+        if (now - lastDropTime >= DROP_INTERVAL_MS) {
+            lastDropTime = now;
             if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
             }
