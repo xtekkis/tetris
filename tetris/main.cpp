@@ -1,5 +1,6 @@
 #include <curses.h>
 #include <cstdlib>
+#include <ctime>
 
 // Board dimensions
 const int BOARD_WIDTH = 10;
@@ -337,7 +338,11 @@ int main() {
     int level = 1;
     bool gameOver = false;
 
-    // Initialize next piece
+    // Seed the random generator so each game has a different piece order
+    srand(static_cast<unsigned int>(time(nullptr)));
+
+    // Pick the first and next pieces
+    currentPiece = rand() % 7;
     nextPiece = rand() % 7;
 
     // Load the first piece
