@@ -83,6 +83,18 @@ long long getTimeMs() {
     return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
 
+// Get the time in milliseconds between automatic drops for a level
+int getDropInterval(int level) {
+    // Start at 500 ms and get 50 ms faster each level
+    int interval = 500 - (level - 1) * 50;
+
+    // Never drop faster than every 100 ms
+    if (interval < 100) {
+        interval = 100;
+    }
+    return interval;
+}
+
 // Copy a tetromino into the active shape
 void loadPiece(int piece) {
     for (int y = 0; y < 4; y++) {
@@ -345,8 +357,7 @@ int main() {
     int level = 1;
     bool gameOver = false;
 
-    // Time in milliseconds between automatic drops
-    const int DROP_INTERVAL_MS = 500;
+    // Time of the last automatic drop
     long long lastDropTime = getTimeMs();
 
     // Seed the random generator so each game has a different piece order
@@ -398,7 +409,7 @@ int main() {
 
         // Auto drop once enough time has passed, no matter how many keys were pressed
         long long now = getTimeMs();
-        if (now - lastDropTime >= DROP_INTERVAL_MS) {
+        if (now - lastDropTime >= getDropInterval(level)) {
             lastDropTime = now;
             if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
@@ -422,6 +433,9 @@ int main() {
                     else if (cleared == 2) score += 300 * level;
                     else if (cleared == 3) score += 500 * level;
                     else if (cleared == 4) score += 800 * level;
+
+                    // Go up a level every 10 lines
+                    level = lines / 10 + 1;
                 }
 
                 // Spawn next piece
