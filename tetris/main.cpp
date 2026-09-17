@@ -453,10 +453,14 @@ int main() {
         }
     }
 
-    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
-    refresh();
-    timeout(-1);
-    getch();
+    // Only show the game over message if the game ended, not when the player quit with ESC
+    if (gameOver) {
+        mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
+        refresh();
+        timeout(-1);
+        getch();
+    }
+
     endwin();
     return 0;
 }
