@@ -185,8 +185,9 @@ void drawControls() {
     mvprintw(controlsY + 6, controlsX, "| W - Rotate|");
     mvprintw(controlsY + 7, controlsX, "| or arrows |");
     mvprintw(controlsY + 8, controlsX, "| SPC - Drop|");
-    mvprintw(controlsY + 9, controlsX, "| ESC - Quit|");
-    mvprintw(controlsY + 10, controlsX, "+-----------+");
+    mvprintw(controlsY + 9, controlsX, "| P - Pause |");
+    mvprintw(controlsY + 10, controlsX, "| ESC - Quit|");
+    mvprintw(controlsY + 11, controlsX, "+-----------+");
 }
 
 // Check if the current shape can be at the given position
@@ -309,6 +310,23 @@ void rotatePiece() {
     }
 }
 
+// Pause the game until P is pressed again
+// Returns true if the player pressed ESC to quit instead
+bool pauseGame() {
+    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 3, "PAUSED");
+    refresh();
+
+    // Wait for P to resume or ESC to quit
+    timeout(-1);
+    int key = 0;
+    while (key != 'p' && key != 'P' && key != 27) {
+        key = getch();
+    }
+    timeout(50);
+
+    return key == 27;
+}
+
 // Display title screen before the game starts
 void showTitleScreen() {
     int termHeight, termWidth;
@@ -417,6 +435,14 @@ int main() {
                 currentY++;
             }
             hardDropped = true;
+        }
+        else if (key == 'p' || key == 'P') {
+            if (pauseGame()) {
+                break;
+            }
+
+            // Don't count the time spent paused towards the next automatic drop
+            lastDropTime = getTimeMs();
         }
 
         // Auto drop once enough time has passed, no matter how many keys were pressed
