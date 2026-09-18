@@ -184,7 +184,8 @@ void drawControls() {
     mvprintw(controlsY + 5, controlsX, "| S - Down  |");
     mvprintw(controlsY + 6, controlsX, "| W - Rotate|");
     mvprintw(controlsY + 7, controlsX, "| ESC - Quit|");
-    mvprintw(controlsY + 8, controlsX, "+-----------+");
+    mvprintw(controlsY + 8, controlsX, "| or arrows |");
+    mvprintw(controlsY + 9, controlsX, "+-----------+");
 }
 
 // Check if the current shape can be at the given position
@@ -388,22 +389,22 @@ int main() {
         if (key == 27) {
             break;
         }
-        else if (key == 'a') {
+        else if (key == 'a' || key == 'A' || key == KEY_LEFT) {
             if (isValidPosition(currentX - 1, currentY)) {
                 currentX--;
             }
         }
-        else if (key == 'd') {
+        else if (key == 'd' || key == 'D' || key == KEY_RIGHT) {
             if (isValidPosition(currentX + 1, currentY)) {
                 currentX++;
             }
         }
-        else if (key == 's') {
+        else if (key == 's' || key == 'S' || key == KEY_DOWN) {
             if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
             }
         }
-        else if (key == 'w') {
+        else if (key == 'w' || key == 'W' || key == KEY_UP) {
             rotatePiece();
         }
 

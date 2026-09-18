@@ -32,11 +32,13 @@ A terminal-based Tetris game built with C++ and PDCurses.
 
 | Key | Action |
 |---|---|
-| A | Move left |
-| D | Move right |
-| S | Move down |
-| W | Rotate |
+| A or ← | Move left |
+| D or → | Move right |
+| S or ↓ | Move down |
+| W or ↑ | Rotate |
 | ESC | Quit |
+
+Controls work with Caps Lock on.
 
 ## Built With
 
