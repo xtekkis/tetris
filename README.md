@@ -19,7 +19,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 - Next piece preview
 - Score, lines and level tracking
 - Multi-line clear scoring bonus
-- Game over detection
+- Game over detection with the option to play again
 
 ## Scoring
 
@@ -40,6 +40,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 | W or ↑ | Rotate |
 | Space | Hard drop |
 | P | Pause / resume |
+| R | Play again (after game over) |
 | ESC | Quit |
 
 Controls work with Caps Lock on.

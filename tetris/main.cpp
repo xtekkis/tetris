@@ -352,24 +352,15 @@ void showTitleScreen() {
     timeout(50);
 }
 
-int main() {
-    // Initialize PDCurses
-    initscr();
-    raw();
-    noecho();
-    curs_set(0);
-    keypad(stdscr, TRUE);
-    timeout(50);
-
-    // Show title screen
-    showTitleScreen();
-    
-
-    // Get terminal size and center the board
-    int termHeight, termWidth;
-    getmaxyx(stdscr, termHeight, termWidth);
-    BOARD_X = (termWidth / 2) - BOARD_WIDTH;
-    BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
+// Play one game from an empty board
+// Returns true if the game ended with game over, false if the player quit with ESC
+bool playGame() {
+    // Start with an empty board
+    for (int y = 0; y < BOARD_HEIGHT; y++) {
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            board[y][x] = 0;
+        }
+    }
 
     // Game state
     int score = 0;
@@ -380,14 +371,13 @@ int main() {
     // Time of the last automatic drop
     long long lastDropTime = getTimeMs();
 
-    // Seed the random generator so each game has a different piece order
-    srand(static_cast<unsigned int>(time(nullptr)));
-
     // Pick the first and next pieces
     currentPiece = rand() % 7;
     nextPiece = rand() % 7;
 
-    // Load the first piece
+    // Load the first piece at the top of the board
+    currentX = 3;
+    currentY = 0;
     loadPiece(currentPiece);
 
     while (!gameOver) {
@@ -491,12 +481,61 @@ int main() {
         }
     }
 
-    // Only show the game over message if the game ended, not when the player quit with ESC
-    if (gameOver) {
-        mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
-        refresh();
-        timeout(-1);
-        getch();
+    return gameOver;
+}
+
+// Show the game over message and wait for the player's choice
+// Returns true if the player wants to play again
+bool askPlayAgain() {
+    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
+    mvprintw(BOARD_Y + BOARD_HEIGHT / 2 + 2, BOARD_X + BOARD_WIDTH - 7, "R - Play again");
+    mvprintw(BOARD_Y + BOARD_HEIGHT / 2 + 3, BOARD_X + BOARD_WIDTH - 5, "ESC - Quit");
+    refresh();
+
+    // Wait for R to play again or ESC to quit
+    timeout(-1);
+    int key = 0;
+    while (key != 'r' && key != 'R' && key != 27) {
+        key = getch();
+    }
+    timeout(50);
+
+    return key == 'r' || key == 'R';
+}
+
+int main() {
+    // Initialize PDCurses
+    initscr();
+    raw();
+    noecho();
+    curs_set(0);
+    keypad(stdscr, TRUE);
+    timeout(50);
+
+    // Show title screen
+    showTitleScreen();
+
+    // Get terminal size and center the board
+    int termHeight, termWidth;
+    getmaxyx(stdscr, termHeight, termWidth);
+    BOARD_X = (termWidth / 2) - BOARD_WIDTH;
+    BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
+
+    // Seed the random generator so each game has a different piece order
+    srand(static_cast<unsigned int>(time(nullptr)));
+
+    // Keep starting new games until the player quits
+    bool playAgain = true;
+    while (playAgain) {
+        bool gameOver = playGame();
+
+        // Only ask to play again if the game ended, not when the player quit with ESC
+        if (gameOver) {
+            playAgain = askPlayAgain();
+        }
+        else {
+            playAgain = false;
+        }
     }
 
     endwin();
