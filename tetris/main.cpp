@@ -183,9 +183,10 @@ void drawControls() {
     mvprintw(controlsY + 4, controlsX, "| D - Right |");
     mvprintw(controlsY + 5, controlsX, "| S - Down  |");
     mvprintw(controlsY + 6, controlsX, "| W - Rotate|");
-    mvprintw(controlsY + 7, controlsX, "| ESC - Quit|");
-    mvprintw(controlsY + 8, controlsX, "| or arrows |");
-    mvprintw(controlsY + 9, controlsX, "+-----------+");
+    mvprintw(controlsY + 7, controlsX, "| or arrows |");
+    mvprintw(controlsY + 8, controlsX, "| SPC - Drop|");
+    mvprintw(controlsY + 9, controlsX, "| ESC - Quit|");
+    mvprintw(controlsY + 10, controlsX, "+-----------+");
 }
 
 // Check if the current shape can be at the given position
@@ -385,6 +386,9 @@ int main() {
         // Handle input first
         int key = getch();
 
+        // Set when the player hard drops, so the piece locks right away
+        bool hardDropped = false;
+
         // 27 is the Escape key
         if (key == 27) {
             break;
@@ -407,10 +411,17 @@ int main() {
         else if (key == 'w' || key == 'W' || key == KEY_UP) {
             rotatePiece();
         }
+        else if (key == ' ') {
+            // Hard drop: move the piece straight down as far as it can go
+            while (isValidPosition(currentX, currentY + 1)) {
+                currentY++;
+            }
+            hardDropped = true;
+        }
 
         // Auto drop once enough time has passed, no matter how many keys were pressed
         long long now = getTimeMs();
-        if (now - lastDropTime >= getDropInterval(level)) {
+        if (hardDropped || now - lastDropTime >= getDropInterval(level)) {
             lastDropTime = now;
             if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;

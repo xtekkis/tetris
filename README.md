@@ -14,6 +14,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 
 - All 7 classic Tetris pieces
 - Ghost piece showing where the current piece will land
+- Hard drop with the space bar
 - Next piece preview
 - Score, lines and level tracking
 - Multi-line clear scoring bonus
@@ -36,6 +37,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 | D or → | Move right |
 | S or ↓ | Move down |
 | W or ↑ | Rotate |
+| Space | Hard drop |
 | ESC | Quit |
 
 Controls work with Caps Lock on.
