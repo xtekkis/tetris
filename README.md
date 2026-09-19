@@ -12,7 +12,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 
 ## Features
 
-- All 7 classic Tetris pieces
+- All 7 classic Tetris pieces, each in its own color
 - Ghost piece showing where the current piece will land
 - Hard drop with the space bar
 - Pause and resume

@@ -12,6 +12,7 @@ int BOARD_X = 12;
 int BOARD_Y = 1;
 
 // The game board
+// 0 is empty, 1 to 7 is the piece that filled the cell, which gives it its color
 int board[BOARD_HEIGHT][BOARD_WIDTH] = { 0 };
 
 // The 7 tetromino shapes
@@ -77,6 +78,22 @@ int currentY = 0;
 // Active piece shape
 int currentShape[4][4];
 
+// Set up one color for each of the 7 pieces
+void initColors() {
+    if (!has_colors()) {
+        return;
+    }
+
+    start_color();
+    init_pair(1, COLOR_CYAN, COLOR_BLACK);     // I
+    init_pair(2, COLOR_YELLOW, COLOR_BLACK);   // O
+    init_pair(3, COLOR_MAGENTA, COLOR_BLACK);  // T
+    init_pair(4, COLOR_GREEN, COLOR_BLACK);    // S
+    init_pair(5, COLOR_RED, COLOR_BLACK);      // Z
+    init_pair(6, COLOR_BLUE, COLOR_BLACK);     // J
+    init_pair(7, COLOR_WHITE, COLOR_BLACK);    // L
+}
+
 // Get the current time in milliseconds
 long long getTimeMs() {
     using namespace std::chrono;
@@ -113,8 +130,10 @@ void drawBoard() {
     for (int y = 0; y < BOARD_HEIGHT; y++) {
         mvprintw(BOARD_Y + y, BOARD_X - 1, "|");
         for (int x = 0; x < BOARD_WIDTH; x++) {
-            if (board[y][x] == 1) {
+            if (board[y][x] != 0) {
+                attron(COLOR_PAIR(board[y][x]));
                 mvprintw(BOARD_Y + y, BOARD_X + x * 2, "[]");
+                attroff(COLOR_PAIR(board[y][x]));
             }
             else {
                 mvprintw(BOARD_Y + y, BOARD_X + x * 2, ". ");
@@ -162,6 +181,7 @@ void drawNextPiece() {
     mvprintw(previewY + 7, previewX, "+--------+");
 
     // Draw the next piece centered inside the box
+    attron(COLOR_PAIR(nextPiece + 1));
     for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
             if (TETROMINOES[nextPiece][y][x] == 1) {
@@ -169,6 +189,7 @@ void drawNextPiece() {
             }
         }
     }
+    attroff(COLOR_PAIR(nextPiece + 1));
 }
 
 // Draw the controls panel below the next piece preview
@@ -203,7 +224,7 @@ bool isValidPosition(int posX, int posY) {
                 if (newY >= BOARD_HEIGHT) return false;
 
                 // Check if cell is already occupied
-                if (newY >= 0 && board[newY][newX] == 1) return false;
+                if (newY >= 0 && board[newY][newX] != 0) return false;
             }
         }
     }
@@ -212,6 +233,7 @@ bool isValidPosition(int posX, int posY) {
 
 // Draw the current falling piece
 void drawPiece() {
+    attron(COLOR_PAIR(currentPiece + 1));
     for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
             if (currentShape[y][x] == 1) {
@@ -221,6 +243,7 @@ void drawPiece() {
             }
         }
     }
+    attroff(COLOR_PAIR(currentPiece + 1));
 }
 
 // Draw ghost piece showing where current piece will land
@@ -454,7 +477,7 @@ bool playGame() {
                 for (int y = 0; y < 4; y++) {
                     for (int x = 0; x < 4; x++) {
                         if (currentShape[y][x] == 1) {
-                            board[currentY + y][currentX + x] = 1;
+                            board[currentY + y][currentX + x] = currentPiece + 1;
                         }
                     }
                 }
@@ -518,6 +541,7 @@ int main() {
     curs_set(0);
     keypad(stdscr, TRUE);
     timeout(50);
+    initColors();
 
     // Show title screen
     showTitleScreen();
