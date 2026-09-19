@@ -412,7 +412,8 @@ bool playGame() {
 
     while (!gameOver) {
         // Draw everything
-        clear();
+        // erase() only redraws what changed, which avoids flicker
+        erase();
         drawBoard();
         drawGhost();
         drawPiece();
