@@ -300,12 +300,19 @@ void rotatePiece() {
         }
     }
 
-    // If not valid revert
-    if (!isValidPosition(currentX, currentY)) {
-        for (int y = 0; y < 4; y++) {
-            for (int x = 0; x < 4; x++) {
-                currentShape[y][x] = backupShape[y][x];
-            }
+    // If the rotated piece does not fit, try moving it up to two cells sideways
+    const int shifts[5] = { 0, -1, 1, -2, 2 };
+    for (int i = 0; i < 5; i++) {
+        if (isValidPosition(currentX + shifts[i], currentY)) {
+            currentX += shifts[i];
+            return;
+        }
+    }
+
+    // It does not fit anywhere, so undo the rotation
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            currentShape[y][x] = backupShape[y][x];
         }
     }
 }
