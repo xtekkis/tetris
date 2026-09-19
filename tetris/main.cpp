@@ -1,4 +1,5 @@
 #include <curses.h>
+#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
@@ -6,6 +7,10 @@
 // Board dimensions
 const int BOARD_WIDTH = 10;
 const int BOARD_HEIGHT = 20;
+
+// Smallest terminal the board and the side panels fit in
+const int MIN_TERM_WIDTH = 54;
+const int MIN_TERM_HEIGHT = 22;
 
 // Board offset
 int BOARD_X = 12;
@@ -544,12 +549,23 @@ int main() {
     timeout(50);
     initColors();
 
+    // Get terminal size
+    int termHeight, termWidth;
+    getmaxyx(stdscr, termHeight, termWidth);
+
+    // Stop if the window is too small, otherwise the panels end up off screen
+    if (termWidth < MIN_TERM_WIDTH || termHeight < MIN_TERM_HEIGHT) {
+        endwin();
+        printf("This window is %d columns by %d rows.\n", termWidth, termHeight);
+        printf("Tetris needs at least %d by %d, so please make it bigger.\n",
+            MIN_TERM_WIDTH, MIN_TERM_HEIGHT);
+        return 1;
+    }
+
     // Show title screen
     showTitleScreen();
 
-    // Get terminal size and center the board
-    int termHeight, termWidth;
-    getmaxyx(stdscr, termHeight, termWidth);
+    // Center the board
     BOARD_X = (termWidth / 2) - BOARD_WIDTH;
     BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
 

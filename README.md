@@ -82,7 +82,7 @@ docker run -it --rm tetris
 - `-it` connects your keyboard and terminal to the container. The game needs this to read key presses and draw the screen.
 - `--rm` deletes the container when you quit the game.
 
-Your terminal window should be at least **60 columns x 24 rows**.
+Your terminal window must be at least **54 columns x 22 rows**. The game tells you and exits if it is smaller.
 
 #### How the Docker build works
 
