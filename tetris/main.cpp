@@ -8,6 +8,9 @@
 const int BOARD_WIDTH = 10;
 const int BOARD_HEIGHT = 20;
 
+// Points for clearing 1, 2, 3 or 4 lines at once, multiplied by the level
+const int LINE_SCORES[5] = { 0, 100, 300, 500, 800 };
+
 // Smallest terminal the board and the side panels fit in
 const int MIN_TERM_WIDTH = 54;
 const int MIN_TERM_HEIGHT = 22;
@@ -117,13 +120,18 @@ int getDropInterval(int level) {
     return interval;
 }
 
-// Copy a tetromino into the active shape
-void loadPiece(int piece) {
+// Copy one 4x4 shape into another
+void copyShape(const int from[4][4], int to[4][4]) {
     for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
-            currentShape[y][x] = TETROMINOES[piece][y][x];
+            to[y][x] = from[y][x];
         }
     }
+}
+
+// Copy a tetromino into the active shape
+void loadPiece(int piece) {
+    copyShape(TETROMINOES[piece], currentShape);
 }
 
 // Draw the board border and cells
@@ -319,14 +327,10 @@ void rotatePiece() {
         }
     }
 
-    // Only apply if valid position
+    // Keep a copy of the old shape, then apply the rotation
     int backupShape[4][4];
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
-            backupShape[y][x] = currentShape[y][x];
-            currentShape[y][x] = temp[y][x];
-        }
-    }
+    copyShape(currentShape, backupShape);
+    copyShape(temp, currentShape);
 
     // If the rotated piece does not fit, try moving it up to two cells sideways
     const int shifts[5] = { 0, -1, 1, -2, 2 };
@@ -338,11 +342,7 @@ void rotatePiece() {
     }
 
     // It does not fit anywhere, so undo the rotation
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
-            currentShape[y][x] = backupShape[y][x];
-        }
-    }
+    copyShape(backupShape, currentShape);
 }
 
 // Pause the game until P is pressed again
@@ -492,11 +492,9 @@ bool playGame() {
                 int cleared = clearLines();
                 if (cleared > 0) {
                     lines += cleared;
+
                     // Reward multi-line clears more
-                    if (cleared == 1) score += 100 * level;
-                    else if (cleared == 2) score += 300 * level;
-                    else if (cleared == 3) score += 500 * level;
-                    else if (cleared == 4) score += 800 * level;
+                    score += LINE_SCORES[cleared] * level;
 
                     // Go up a level every 10 lines
                     level = lines / 10 + 1;
