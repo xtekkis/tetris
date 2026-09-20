@@ -76,13 +76,25 @@ You don't need a compiler, only [Docker Desktop](https://www.docker.com/products
 docker build -t tetris .
 
 # Play
-docker run -it --rm tetris
+docker run -it --rm --network none --cap-drop ALL --security-opt no-new-privileges --read-only tetris
 ```
 
-- `-it` connects your keyboard and terminal to the container. The game needs this to read key presses and draw the screen.
-- `--rm` deletes the container when you quit the game.
-
 Your terminal window must be at least **54 columns x 22 rows**. The game tells you and exits if it is smaller.
+
+#### What the run options do
+
+The first two are needed to play. The rest lock the container down: the game only needs a keyboard and a screen, so everything else is switched off.
+
+| Option | What it does |
+|---|---|
+| `-it` | Connects your keyboard and terminal, so the game can read keys and draw |
+| `--rm` | Deletes the container when you quit |
+| `--network none` | No network at all, so the game cannot connect anywhere |
+| `--cap-drop ALL` | Drops every Linux privilege, none of which the game uses |
+| `--security-opt no-new-privileges` | Stops any program inside from gaining more privileges |
+| `--read-only` | Makes the whole filesystem read-only, so nothing inside can be changed |
+
+The game runs fine with all of them. `docker run -it --rm tetris` also works if you want the short version.
 
 #### How the Docker build works
 

@@ -21,6 +21,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends libncurses6 \
     && rm -rf /var/lib/apt/lists/*
 
+# Remove the setuid and setgid bits from programs like su, passwd and mount.
+# The game never switches users, so nothing here needs extra privileges.
+RUN find / -xdev -perm /6000 -type f -exec chmod a-s {} +
+
 # Run as a non-root user
 RUN useradd --create-home player
 USER player
