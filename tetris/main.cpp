@@ -8,6 +8,15 @@
 const int BOARD_WIDTH = 10;
 const int BOARD_HEIGHT = 20;
 
+// Number of different pieces
+const int PIECE_COUNT = 7;
+
+// Column a new piece starts in
+const int SPAWN_X = 3;
+
+// How long the game waits for a key press before drawing the next frame
+const int INPUT_WAIT_MS = 50;
+
 // Points for clearing 1, 2, 3 or 4 lines at once, multiplied by the level
 const int LINE_SCORES[5] = { 0, 100, 300, 500, 800 };
 
@@ -25,7 +34,7 @@ int board[BOARD_HEIGHT][BOARD_WIDTH] = { 0 };
 
 // The 7 tetromino shapes
 // 1 = block, 0 = empty
-const int TETROMINOES[7][4][4] = {
+const int TETROMINOES[PIECE_COUNT][4][4] = {
     // I piece
     {
         {0, 0, 0, 0},
@@ -80,7 +89,7 @@ const int TETROMINOES[7][4][4] = {
 // Current piece state
 int currentPiece = 0;
 int nextPiece = 0;
-int currentX = 3;
+int currentX = SPAWN_X;
 int currentY = 0;
 
 // Active piece shape
@@ -357,7 +366,7 @@ bool pauseGame() {
     while (key != 'p' && key != 'P' && key != 27) {
         key = getch();
     }
-    timeout(50);
+    timeout(INPUT_WAIT_MS);
 
     return key == 27;
 }
@@ -384,7 +393,7 @@ void showTitleScreen() {
     // Wait for keypress
     timeout(-1);
     getch();
-    timeout(50);
+    timeout(INPUT_WAIT_MS);
 }
 
 // Play one game from an empty board
@@ -407,11 +416,11 @@ bool playGame() {
     long long lastDropTime = getTimeMs();
 
     // Pick the first and next pieces
-    currentPiece = rand() % 7;
-    nextPiece = rand() % 7;
+    currentPiece = rand() % PIECE_COUNT;
+    nextPiece = rand() % PIECE_COUNT;
 
     // Load the first piece at the top of the board
-    currentX = 3;
+    currentX = SPAWN_X;
     currentY = 0;
     loadPiece(currentPiece);
 
@@ -502,10 +511,10 @@ bool playGame() {
 
                 // Spawn next piece
                 currentPiece = nextPiece;
-                currentX = 3;
+                currentX = SPAWN_X;
                 currentY = 0;
                 loadPiece(currentPiece);
-                nextPiece = rand() % 7;
+                nextPiece = rand() % PIECE_COUNT;
 
                 // Check game over
                 if (!isValidPosition(currentX, currentY)) {
@@ -532,7 +541,7 @@ bool askPlayAgain() {
     while (key != 'r' && key != 'R' && key != 27) {
         key = getch();
     }
-    timeout(50);
+    timeout(INPUT_WAIT_MS);
 
     return key == 'r' || key == 'R';
 }
@@ -544,7 +553,7 @@ int main() {
     noecho();
     curs_set(0);
     keypad(stdscr, TRUE);
-    timeout(50);
+    timeout(INPUT_WAIT_MS);
     initColors();
 
     // Get terminal size
