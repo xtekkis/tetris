@@ -1,10 +1,9 @@
-
+# Visual Studio
 .vs/
 x64/
 Debug/
 Release/
 *.idb
-*.pdb
 *.user
 
 # NuGet packages (Visual Studio downloads these on build)
@@ -34,7 +33,6 @@ packages/
 *.dylib
 *.dll
 *.so.*
-
 
 # Fortran module files
 *.mod
