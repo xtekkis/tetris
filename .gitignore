@@ -49,10 +49,12 @@ packages/
 *.out
 *.app
 
-# Build directories
-build/
-Build/
-build-*/
+# Build directories at the top of the repository only.
+# Without the leading slash these also match folders like
+# tetris/packages/PDCurses34.3.4.0.1/build, which hid files we needed.
+/build/
+/Build/
+/build-*/
 
 # CMake generated files
 CMakeFiles/
