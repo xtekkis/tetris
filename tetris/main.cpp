@@ -96,8 +96,15 @@ int heldPiece = EMPTY_HOLD;
 
 // The player can only hold once per piece, until the next piece spawns
 bool holdUsed = false;
+
 int currentX = SPAWN_X;
 int currentY = 0;
+
+// The pieces still to come, dealt 7 at a time in a random order
+int bag[PIECE_COUNT];
+
+// How far through the bag we are, starting empty so the first piece refills it
+int bagIndex = PIECE_COUNT;
 
 // Active piece shape
 int currentShape[4][4];
@@ -150,6 +157,34 @@ void loadPiece(int piece) {
     copyShape(TETROMINOES[piece], currentShape);
 }
 
+// Refill the bag with all 7 pieces in a random order
+void fillBag() {
+    for (int i = 0; i < PIECE_COUNT; i++) {
+        bag[i] = i;
+    }
+
+    // Shuffle by swapping each piece with a random one at or before it
+    for (int i = PIECE_COUNT - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int temp = bag[i];
+        bag[i] = bag[j];
+        bag[j] = temp;
+    }
+
+    bagIndex = 0;
+}
+
+// Take the next piece out of the bag, refilling it when it runs out
+int takePieceFromBag() {
+    if (bagIndex >= PIECE_COUNT) {
+        fillBag();
+    }
+
+    int piece = bag[bagIndex];
+    bagIndex++;
+    return piece;
+}
+
 // Swap the current piece with the held piece, once per piece
 void holdPiece() {
     if (holdUsed) {
@@ -162,7 +197,7 @@ void holdPiece() {
     if (previousHeld == EMPTY_HOLD) {
         // Nothing was held yet, so carry on with the next piece
         currentPiece = nextPiece;
-        nextPiece = rand() % PIECE_COUNT;
+        nextPiece = takePieceFromBag();
     }
     else {
         currentPiece = previousHeld;
@@ -480,13 +515,16 @@ bool playGame() {
     // Time of the last automatic drop
     long long lastDropTime = getTimeMs();
 
+    // Start each game with a fresh bag of pieces
+    bagIndex = PIECE_COUNT;
+
     // Nothing is held at the start of a game
     heldPiece = EMPTY_HOLD;
     holdUsed = false;
 
     // Pick the first and next pieces
-    currentPiece = rand() % PIECE_COUNT;
-    nextPiece = rand() % PIECE_COUNT;
+    currentPiece = takePieceFromBag();
+    nextPiece = takePieceFromBag();
 
     // Load the first piece at the top of the board
     currentX = SPAWN_X;
@@ -587,7 +625,7 @@ bool playGame() {
                 currentX = SPAWN_X;
                 currentY = 0;
                 loadPiece(currentPiece);
-                nextPiece = rand() % PIECE_COUNT;
+                nextPiece = takePieceFromBag();
                 holdUsed = false;
 
                 // Check game over
