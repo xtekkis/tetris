@@ -15,6 +15,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 - All 7 classic Tetris pieces, each in its own color
 - Ghost piece showing where the current piece will land
 - Hard drop with the space bar
+- Hold a piece to use later
 - Pause and resume
 - Next piece preview
 - Score, lines and level tracking
@@ -39,6 +40,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 | S or ↓ | Move down |
 | W or ↑ | Rotate |
 | Space | Hard drop |
+| C | Hold piece |
 | P | Pause / resume |
 | R | Play again (after game over) |
 | ESC | Quit |
@@ -79,7 +81,7 @@ docker build -t tetris .
 docker run -it --rm --network none --cap-drop ALL --security-opt no-new-privileges --read-only tetris
 ```
 
-Your terminal window must be at least **54 columns x 22 rows**. The game tells you and exits if it is smaller.
+Your terminal window must be at least **54 columns x 23 rows**. The game tells you and exits if it is smaller.
 
 #### What the run options do
 

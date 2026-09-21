@@ -22,7 +22,7 @@ const int LINE_SCORES[5] = { 0, 100, 300, 500, 800 };
 
 // Smallest terminal the board and the side panels fit in
 const int MIN_TERM_WIDTH = 54;
-const int MIN_TERM_HEIGHT = 22;
+const int MIN_TERM_HEIGHT = 23;
 
 // Board offset
 int BOARD_X = 12;
@@ -86,9 +86,16 @@ const int TETROMINOES[PIECE_COUNT][4][4] = {
     }
 };
 
+// Value of heldPiece when the player has not held anything yet
+const int EMPTY_HOLD = -1;
+
 // Current piece state
 int currentPiece = 0;
 int nextPiece = 0;
+int heldPiece = EMPTY_HOLD;
+
+// The player can only hold once per piece, until the next piece spawns
+bool holdUsed = false;
 int currentX = SPAWN_X;
 int currentY = 0;
 
@@ -143,6 +150,32 @@ void loadPiece(int piece) {
     copyShape(TETROMINOES[piece], currentShape);
 }
 
+// Swap the current piece with the held piece, once per piece
+void holdPiece() {
+    if (holdUsed) {
+        return;
+    }
+
+    int previousHeld = heldPiece;
+    heldPiece = currentPiece;
+
+    if (previousHeld == EMPTY_HOLD) {
+        // Nothing was held yet, so carry on with the next piece
+        currentPiece = nextPiece;
+        nextPiece = rand() % PIECE_COUNT;
+    }
+    else {
+        currentPiece = previousHeld;
+    }
+
+    // The swapped in piece starts at the top again
+    currentX = SPAWN_X;
+    currentY = 0;
+    loadPiece(currentPiece);
+
+    holdUsed = true;
+}
+
 // Draw the board border and cells
 void drawBoard() {
     // Draw top border
@@ -187,6 +220,37 @@ void drawStats(int score, int lines, int level) {
     mvprintw(statsY + 11, statsX, "+----------+");
 }
 
+// Draw the held piece panel below the stats panel
+void drawHold() {
+    int holdX = BOARD_X - 14;
+    int holdY = BOARD_Y + 13;
+
+    mvprintw(holdY, holdX, "+--------+");
+    mvprintw(holdY + 1, holdX, "|  HOLD  |");
+    mvprintw(holdY + 2, holdX, "+--------+");
+
+    // Draw empty hold area
+    for (int y = 0; y < 4; y++) {
+        mvprintw(holdY + 3 + y, holdX, "|        |");
+    }
+    mvprintw(holdY + 7, holdX, "+--------+");
+
+    // Nothing to show until the player holds a piece
+    if (heldPiece == EMPTY_HOLD) {
+        return;
+    }
+
+    attron(COLOR_PAIR(heldPiece + 1));
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (TETROMINOES[heldPiece][y][x] == 1) {
+                mvprintw(holdY + 3 + y, holdX + 1 + x * 2, "[]");
+            }
+        }
+    }
+    attroff(COLOR_PAIR(heldPiece + 1));
+}
+
 // Draw the next piece preview panel
 void drawNextPiece() {
     int previewX = BOARD_X + BOARD_WIDTH * 2 + 4;
@@ -228,9 +292,10 @@ void drawControls() {
     mvprintw(controlsY + 6, controlsX, "| W - Rotate|");
     mvprintw(controlsY + 7, controlsX, "| or arrows |");
     mvprintw(controlsY + 8, controlsX, "| SPC - Drop|");
-    mvprintw(controlsY + 9, controlsX, "| P - Pause |");
-    mvprintw(controlsY + 10, controlsX, "| ESC - Quit|");
-    mvprintw(controlsY + 11, controlsX, "+-----------+");
+    mvprintw(controlsY + 9, controlsX, "| C - Hold  |");
+    mvprintw(controlsY + 10, controlsX, "| P - Pause |");
+    mvprintw(controlsY + 11, controlsX, "| ESC - Quit|");
+    mvprintw(controlsY + 12, controlsX, "+-----------+");
 }
 
 // Check if the current shape can be at the given position
@@ -415,6 +480,10 @@ bool playGame() {
     // Time of the last automatic drop
     long long lastDropTime = getTimeMs();
 
+    // Nothing is held at the start of a game
+    heldPiece = EMPTY_HOLD;
+    holdUsed = false;
+
     // Pick the first and next pieces
     currentPiece = rand() % PIECE_COUNT;
     nextPiece = rand() % PIECE_COUNT;
@@ -432,6 +501,7 @@ bool playGame() {
         drawGhost();
         drawPiece();
         drawStats(score, lines, level);
+        drawHold();
         drawNextPiece();
         drawControls();
         refresh();
@@ -470,6 +540,9 @@ bool playGame() {
                 currentY++;
             }
             hardDropped = true;
+        }
+        else if (key == 'c' || key == 'C') {
+            holdPiece();
         }
         else if (key == 'p' || key == 'P') {
             if (pauseGame()) {
@@ -515,6 +588,7 @@ bool playGame() {
                 currentY = 0;
                 loadPiece(currentPiece);
                 nextPiece = rand() % PIECE_COUNT;
+                holdUsed = false;
 
                 // Check game over
                 if (!isValidPosition(currentX, currentY)) {
