@@ -2,7 +2,9 @@
 # A full image with the C++ compiler and the ncurses headers.
 # ncurses is the Linux equivalent of PDCurses and provides the same curses.h API,
 # so main.cpp compiles unchanged.
-FROM gcc:14 AS build
+# The -bookworm tag matters: it must match the runtime image below, otherwise the
+# compiled game needs a newer C library than the runtime image has and will not start.
+FROM gcc:14-bookworm AS build
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libncurses-dev \
