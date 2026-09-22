@@ -23,6 +23,10 @@ const int INPUT_WAIT_MS = 50;
 // Points for clearing 1, 2, 3 or 4 lines at once, multiplied by the level
 const int LINE_SCORES[5] = { 0, 100, 300, 500, 800 };
 
+// Points per row for dropping a piece yourself, not multiplied by the level
+const int SOFT_DROP_POINTS = 1;
+const int HARD_DROP_POINTS = 2;
+
 // Smallest terminal the board and the side panels fit in
 const int MIN_TERM_WIDTH = 54;
 const int MIN_TERM_HEIGHT = 23;
@@ -574,6 +578,7 @@ bool playGame() {
         else if (key == 's' || key == 'S' || key == KEY_DOWN) {
             if (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
+                score += SOFT_DROP_POINTS;
             }
         }
         else if (key == 'w' || key == 'W' || key == KEY_UP) {
@@ -581,9 +586,13 @@ bool playGame() {
         }
         else if (key == ' ') {
             // Hard drop: move the piece straight down as far as it can go
+            int rowsDropped = 0;
             while (isValidPosition(currentX, currentY + 1)) {
                 currentY++;
+                rowsDropped++;
             }
+
+            score += rowsDropped * HARD_DROP_POINTS;
             hardDropped = true;
         }
         else if (key == 'c' || key == 'C') {

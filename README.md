@@ -26,12 +26,14 @@ A terminal-based Tetris game built with C++ and PDCurses.
 
 ## Scoring
 
-| Lines Cleared | Points |
+| Action | Points |
 |---|---|
 | 1 line | 100 x level |
 | 2 lines | 300 x level |
 | 3 lines | 500 x level |
 | 4 lines | 800 x level |
+| Soft drop (S) | 1 per row |
+| Hard drop (Space) | 2 per row |
 
 ## Controls
 
