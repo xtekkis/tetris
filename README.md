@@ -17,6 +17,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 - Ghost piece showing where the current piece will land
 - Hard drop with the space bar
 - Hold a piece to use later
+- Short pause when a piece lands, so you can still slide it into place
 - Pause and resume
 - Next piece preview
 - Score, lines and level tracking

@@ -14,6 +14,9 @@ const int PIECE_COUNT = 7;
 // Column a new piece starts in
 const int SPAWN_X = 3;
 
+// How long a piece rests on the ground before it locks in place
+const int LOCK_DELAY_MS = 500;
+
 // How long the game waits for a key press before drawing the next frame
 const int INPUT_WAIT_MS = 50;
 
@@ -515,6 +518,10 @@ bool playGame() {
     // Time of the last automatic drop
     long long lastDropTime = getTimeMs();
 
+    // Whether the piece is resting on the ground, and since when
+    bool landed = false;
+    long long landedTime = 0;
+
     // Start each game with a fresh bag of pieces
     bagIndex = PIECE_COUNT;
 
@@ -591,48 +598,65 @@ bool playGame() {
             lastDropTime = getTimeMs();
         }
 
-        // Auto drop once enough time has passed, no matter how many keys were pressed
         long long now = getTimeMs();
-        if (hardDropped || now - lastDropTime >= getDropInterval(level)) {
+
+        // The piece is resting when it cannot move down any further
+        bool resting = !isValidPosition(currentX, currentY + 1);
+
+        // Start the lock delay when the piece lands, and cancel it if it moves off again
+        if (resting && !landed) {
+            landed = true;
+            landedTime = now;
+        }
+        else if (!resting) {
+            landed = false;
+        }
+
+        // Drop the piece once enough time has passed, no matter how many keys were pressed
+        if (!resting && now - lastDropTime >= getDropInterval(level)) {
             lastDropTime = now;
-            if (isValidPosition(currentX, currentY + 1)) {
-                currentY++;
-            }
-            else {
-                // Place piece on board
-                for (int y = 0; y < 4; y++) {
-                    for (int x = 0; x < 4; x++) {
-                        if (currentShape[y][x] == 1) {
-                            board[currentY + y][currentX + x] = currentPiece + 1;
-                        }
+            currentY++;
+        }
+
+        // Lock the piece after a hard drop, or once it has rested for the lock delay
+        if (hardDropped || (landed && now - landedTime >= LOCK_DELAY_MS)) {
+            // Place piece on board
+            for (int y = 0; y < 4; y++) {
+                for (int x = 0; x < 4; x++) {
+                    if (currentShape[y][x] == 1) {
+                        board[currentY + y][currentX + x] = currentPiece + 1;
                     }
                 }
-
-                // Clear completed lines and update score
-                int cleared = clearLines();
-                if (cleared > 0) {
-                    lines += cleared;
-
-                    // Reward multi-line clears more
-                    score += LINE_SCORES[cleared] * level;
-
-                    // Go up a level every 10 lines
-                    level = lines / 10 + 1;
-                }
-
-                // Spawn next piece
-                currentPiece = nextPiece;
-                currentX = SPAWN_X;
-                currentY = 0;
-                loadPiece(currentPiece);
-                nextPiece = takePieceFromBag();
-                holdUsed = false;
-
-                // Check game over
-                if (!isValidPosition(currentX, currentY)) {
-                    gameOver = true;
-                }
             }
+
+            // Clear completed lines and update score
+            int cleared = clearLines();
+            if (cleared > 0) {
+                lines += cleared;
+
+                // Reward multi-line clears more
+                score += LINE_SCORES[cleared] * level;
+
+                // Go up a level every 10 lines
+                level = lines / 10 + 1;
+            }
+
+            // Spawn next piece
+            currentPiece = nextPiece;
+            currentX = SPAWN_X;
+            currentY = 0;
+            loadPiece(currentPiece);
+            nextPiece = takePieceFromBag();
+            holdUsed = false;
+
+            // Check game over
+            if (!isValidPosition(currentX, currentY)) {
+                gameOver = true;
+            }
+
+            // The next piece starts its own drop and lock timers
+            landed = false;
+            lastDropTime = now;
         }
     }
 
