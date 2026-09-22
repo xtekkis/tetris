@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <fstream>
 
 // Board dimensions
 const int BOARD_WIDTH = 10;
@@ -22,6 +23,9 @@ const int INPUT_WAIT_MS = 50;
 
 // Points for clearing 1, 2, 3 or 4 lines at once, multiplied by the level
 const int LINE_SCORES[5] = { 0, 100, 300, 500, 800 };
+
+// Where the best score is saved, in the folder the game is run from
+const char HIGH_SCORE_FILE[] = "highscore.txt";
 
 // Points per row for dropping a piece yourself, not multiplied by the level
 const int SOFT_DROP_POINTS = 1;
@@ -130,6 +134,24 @@ void initColors() {
     init_pair(5, COLOR_RED, COLOR_BLACK);      // Z
     init_pair(6, COLOR_BLUE, COLOR_BLACK);     // J
     init_pair(7, COLOR_WHITE, COLOR_BLACK);    // L
+}
+
+// Read the best score from the save file, or 0 if there is none yet
+int loadHighScore() {
+    std::ifstream file(HIGH_SCORE_FILE);
+
+    int score = 0;
+    if (!(file >> score) || score < 0) {
+        score = 0;
+    }
+    return score;
+}
+
+// Save the best score. If the file cannot be written, for example on a
+// read only disk, the score is simply not saved.
+void saveHighScore(int score) {
+    std::ofstream file(HIGH_SCORE_FILE);
+    file << score;
 }
 
 // Get the current time in milliseconds
@@ -479,7 +501,7 @@ bool pauseGame() {
 }
 
 // Display title screen before the game starts
-void showTitleScreen() {
+void showTitleScreen(int highScore) {
     int termHeight, termWidth;
     getmaxyx(stdscr, termHeight, termWidth);
     int centerX = termWidth / 2;
@@ -494,7 +516,8 @@ void showTitleScreen() {
     mvprintw(centerY + 1, centerX - 10, "|    and PDCurses   |");
     mvprintw(centerY + 2, centerX - 10, "|                   |");
     mvprintw(centerY + 3, centerX - 10, "+-------------------+");
-    mvprintw(centerY + 5, centerX - 10, "Press any key to start");
+    mvprintw(centerY + 5, centerX - 10, "Best score: %d", highScore);
+    mvprintw(centerY + 6, centerX - 10, "Press any key to start");
     refresh();
 
     // Wait for keypress
@@ -503,9 +526,9 @@ void showTitleScreen() {
     timeout(INPUT_WAIT_MS);
 }
 
-// Play one game from an empty board
+// Play one game from an empty board, putting the final score in finalScore
 // Returns true if the game ended with game over, false if the player quit with ESC
-bool playGame() {
+bool playGame(int& finalScore) {
     // Start with an empty board
     for (int y = 0; y < BOARD_HEIGHT; y++) {
         for (int x = 0; x < BOARD_WIDTH; x++) {
@@ -669,15 +692,27 @@ bool playGame() {
         }
     }
 
+    finalScore = score;
     return gameOver;
 }
 
 // Show the game over message and wait for the player's choice
 // Returns true if the player wants to play again
-bool askPlayAgain() {
-    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
-    mvprintw(BOARD_Y + BOARD_HEIGHT / 2 + 2, BOARD_X + BOARD_WIDTH - 7, "R - Play again");
-    mvprintw(BOARD_Y + BOARD_HEIGHT / 2 + 3, BOARD_X + BOARD_WIDTH - 5, "ESC - Quit");
+bool askPlayAgain(int score, int highScore, bool newBest) {
+    int centerY = BOARD_Y + BOARD_HEIGHT / 2;
+
+    mvprintw(centerY, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
+    mvprintw(centerY + 2, BOARD_X + BOARD_WIDTH - 6, "Score: %-6d", score);
+
+    if (newBest) {
+        mvprintw(centerY + 3, BOARD_X + BOARD_WIDTH - 6, "NEW BEST!   ");
+    }
+    else {
+        mvprintw(centerY + 3, BOARD_X + BOARD_WIDTH - 6, "Best: %-6d", highScore);
+    }
+
+    mvprintw(centerY + 5, BOARD_X + BOARD_WIDTH - 7, "R - Play again");
+    mvprintw(centerY + 6, BOARD_X + BOARD_WIDTH - 5, "ESC - Quit");
     refresh();
 
     // Wait for R to play again or ESC to quit
@@ -714,8 +749,9 @@ int main() {
         return 1;
     }
 
-    // Show title screen
-    showTitleScreen();
+    // Show title screen with the best score so far
+    int highScore = loadHighScore();
+    showTitleScreen(highScore);
 
     // Center the board
     BOARD_X = (termWidth / 2) - BOARD_WIDTH;
@@ -727,11 +763,18 @@ int main() {
     // Keep starting new games until the player quits
     bool playAgain = true;
     while (playAgain) {
-        bool gameOver = playGame();
+        int score = 0;
+        bool gameOver = playGame(score);
 
         // Only ask to play again if the game ended, not when the player quit with ESC
         if (gameOver) {
-            playAgain = askPlayAgain();
+            bool newBest = score > highScore;
+            if (newBest) {
+                highScore = score;
+                saveHighScore(highScore);
+            }
+
+            playAgain = askPlayAgain(score, highScore, newBest);
         }
         else {
             playAgain = false;

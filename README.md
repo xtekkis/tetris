@@ -22,6 +22,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 - Next piece preview
 - Score, lines and level tracking
 - Multi-line clear scoring bonus
+- Best score saved between games
 - Game over detection with the option to play again
 
 ## Scoring
@@ -73,6 +74,8 @@ cd tetris
 2. Select the `x64` platform
 3. Build and run with `Ctrl + F5`
 
+Your best score is saved in `highscore.txt`, in the folder the game runs from.
+
 ### Option 2: Docker
 
 You don't need a compiler, only [Docker Desktop](https://www.docker.com/products/docker-desktop/) (it must be running).
@@ -86,6 +89,16 @@ docker run -it --rm --network none --cap-drop ALL --security-opt no-new-privileg
 ```
 
 Your terminal window must be at least **54 columns x 23 rows**. The game tells you and exits if it is smaller.
+
+#### Keeping your best score
+
+The container is deleted when you quit, so the best score goes with it. To keep it, give Docker a storage volume for the game's folder:
+
+```bash
+docker run -it --rm --network none --cap-drop ALL --security-opt no-new-privileges --read-only -v tetris-scores:/home/player tetris
+```
+
+`-v tetris-scores:/home/player` stores `highscore.txt` in a Docker volume named `tetris-scores`, which survives between runs. Without it the game still plays, it just cannot save.
 
 #### What the run options do
 
