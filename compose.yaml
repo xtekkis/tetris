@@ -1,0 +1,28 @@
+# Play with:  docker compose run --rm tetris
+# This is the long docker run command from the README, kept in a file.
+
+services:
+  tetris:
+    build: .
+    image: tetris
+
+    # Connects your keyboard and terminal, so the game can read keys and draw
+    stdin_open: true
+    tty: true
+
+    # The game only needs a keyboard and a screen, so everything else is switched off
+    network_mode: none
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+
+    # Keeps highscore.txt between runs
+    volumes:
+      - tetris-scores:/home/player
+
+volumes:
+  tetris-scores:
+    # Without this, compose would name the volume after the folder instead
+    name: tetris-scores
