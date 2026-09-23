@@ -15,6 +15,10 @@ const int PIECE_COUNT = 7;
 // Column a new piece starts in
 const int SPAWN_X = 3;
 
+// How many times completed rows blink before they disappear, and how long each step lasts
+const int FLASH_STEPS = 4;
+const int FLASH_STEP_MS = 60;
+
 // How long a piece rests on the ground before it locks in place
 const int LOCK_DELAY_MS = 500;
 
@@ -420,6 +424,49 @@ void drawGhost() {
     }
 }
 
+// Blink the completed rows so the player sees which lines are going
+void flashFullLines() {
+    // Work out which rows are full
+    bool full[BOARD_HEIGHT];
+    bool anyFull = false;
+
+    for (int y = 0; y < BOARD_HEIGHT; y++) {
+        full[y] = true;
+        for (int x = 0; x < BOARD_WIDTH; x++) {
+            if (board[y][x] == 0) {
+                full[y] = false;
+                break;
+            }
+        }
+        if (full[y]) {
+            anyFull = true;
+        }
+    }
+
+    if (!anyFull) {
+        return;
+    }
+
+    for (int step = 0; step < FLASH_STEPS; step++) {
+        drawBoard();
+
+        // On every other step, cover the finished rows so they stand out
+        if (step % 2 == 0) {
+            for (int y = 0; y < BOARD_HEIGHT; y++) {
+                if (!full[y]) {
+                    continue;
+                }
+                for (int x = 0; x < BOARD_WIDTH; x++) {
+                    mvprintw(BOARD_Y + y, BOARD_X + x * 2, "##");
+                }
+            }
+        }
+
+        refresh();
+        napms(FLASH_STEP_MS);
+    }
+}
+
 // Check for and clear completed lines
 int clearLines() {
     int linesCleared = 0;
@@ -704,6 +751,7 @@ bool playGame(int& finalScore) {
             }
 
             // Clear completed lines and update score
+            flashFullLines();
             int cleared = clearLines();
             if (cleared > 0) {
                 lines += cleared;
@@ -728,9 +776,10 @@ bool playGame(int& finalScore) {
                 gameOver = true;
             }
 
-            // The next piece starts its own drop and lock timers
+            // The next piece starts its own drop and lock timers.
+            // The time is read again because the line flash takes a moment.
             landed = false;
-            lastDropTime = now;
+            lastDropTime = getTimeMs();
         }
     }
 

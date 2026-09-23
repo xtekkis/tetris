@@ -21,6 +21,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 - Pause and resume
 - Next piece preview
 - Score, lines and level tracking
+- Completed rows flash before they disappear
 - Multi-line clear scoring bonus
 - Best score saved between games
 - Game over detection with the option to play again
