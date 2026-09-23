@@ -90,6 +90,8 @@ docker run -it --rm --network none --cap-drop ALL --security-opt no-new-privileg
 
 Your terminal window must be at least **54 columns x 23 rows**. The game tells you and exits if it is smaller.
 
+If you resize the window while playing, the board re-centres itself. Make it too small and the game waits, showing the size it needs, until you make it bigger again.
+
 #### Keeping your best score
 
 The container is deleted when you quit, so the best score goes with it. To keep it, give Docker a storage volume for the game's folder:

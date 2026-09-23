@@ -500,6 +500,41 @@ bool pauseGame() {
     return key == 27;
 }
 
+// Put the board in the middle of the terminal
+void centerBoard() {
+    int termHeight, termWidth;
+    getmaxyx(stdscr, termHeight, termWidth);
+    BOARD_X = (termWidth / 2) - BOARD_WIDTH;
+    BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
+}
+
+// Deal with the terminal being resized while playing: pick up the new size,
+// ask for a bigger window while it is too small, then center the board again
+void handleResize() {
+#ifdef PDCURSES
+    // PDCurses needs to be told to pick up the new size. ncurses does it itself.
+    resize_term(0, 0);
+#endif
+
+    int termHeight, termWidth;
+    getmaxyx(stdscr, termHeight, termWidth);
+
+    while (termWidth < MIN_TERM_WIDTH || termHeight < MIN_TERM_HEIGHT) {
+        erase();
+        mvprintw(0, 0, "Window is %d x %d", termWidth, termHeight);
+        mvprintw(1, 0, "Please make it at least %d x %d", MIN_TERM_WIDTH, MIN_TERM_HEIGHT);
+        refresh();
+
+        getch();
+#ifdef PDCURSES
+        resize_term(0, 0);
+#endif
+        getmaxyx(stdscr, termHeight, termWidth);
+    }
+
+    centerBoard();
+}
+
 // Display title screen before the game starts
 void showTitleScreen(int highScore) {
     int termHeight, termWidth;
@@ -620,6 +655,13 @@ bool playGame(int& finalScore) {
         }
         else if (key == 'c' || key == 'C') {
             holdPiece();
+        }
+        else if (key == KEY_RESIZE) {
+            handleResize();
+
+            // Time passed while the window was being resized, so start the timers again
+            lastDropTime = getTimeMs();
+            landed = false;
         }
         else if (key == 'p' || key == 'P') {
             if (pauseGame()) {
@@ -754,8 +796,7 @@ int main() {
     showTitleScreen(highScore);
 
     // Center the board
-    BOARD_X = (termWidth / 2) - BOARD_WIDTH;
-    BOARD_Y = (termHeight / 2) - (BOARD_HEIGHT / 2);
+    centerBoard();
 
     // Seed the random generator so each game has a different piece order
     srand(static_cast<unsigned int>(time(nullptr)));
