@@ -15,6 +15,9 @@ const int PIECE_COUNT = 7;
 // Column a new piece starts in
 const int SPAWN_X = 3;
 
+// Highest level the player can start on
+const int MAX_START_LEVEL = 10;
+
 // How many times completed rows blink before they disappear, and how long each step lasts
 const int FLASH_STEPS = 4;
 const int FLASH_STEP_MS = 60;
@@ -583,34 +586,57 @@ void handleResize() {
 }
 
 // Display title screen before the game starts
-void showTitleScreen(int highScore) {
+// Returns the level to start on, or 0 if the player quit with ESC
+int showTitleScreen(int highScore) {
     int termHeight, termWidth;
     getmaxyx(stdscr, termHeight, termWidth);
     int centerX = termWidth / 2;
     int centerY = termHeight / 2;
 
-    clear();
-    mvprintw(centerY - 4, centerX - 10, "+-------------------+");
-    mvprintw(centerY - 3, centerX - 10, "|                   |");
-    mvprintw(centerY - 2, centerX - 10, "|      TETRIS       |");
-    mvprintw(centerY - 1, centerX - 10, "|                   |");
-    mvprintw(centerY, centerX - 10, "|   Built with C++  |");
-    mvprintw(centerY + 1, centerX - 10, "|    and PDCurses   |");
-    mvprintw(centerY + 2, centerX - 10, "|                   |");
-    mvprintw(centerY + 3, centerX - 10, "+-------------------+");
-    mvprintw(centerY + 5, centerX - 10, "Best score: %d", highScore);
-    mvprintw(centerY + 6, centerX - 10, "Press any key to start");
-    refresh();
+    int startLevel = 1;
 
-    // Wait for keypress
+    // Wait for the player to choose a level and start
     timeout(-1);
-    getch();
+    while (true) {
+        clear();
+        mvprintw(centerY - 4, centerX - 10, "+-------------------+");
+        mvprintw(centerY - 3, centerX - 10, "|                   |");
+        mvprintw(centerY - 2, centerX - 10, "|      TETRIS       |");
+        mvprintw(centerY - 1, centerX - 10, "|                   |");
+        mvprintw(centerY, centerX - 10, "|   Built with C++  |");
+        mvprintw(centerY + 1, centerX - 10, "|    and PDCurses   |");
+        mvprintw(centerY + 2, centerX - 10, "|                   |");
+        mvprintw(centerY + 3, centerX - 10, "+-------------------+");
+        mvprintw(centerY + 5, centerX - 10, "Best score: %d", highScore);
+        mvprintw(centerY + 7, centerX - 10, "Start level: %-2d", startLevel);
+        mvprintw(centerY + 8, centerX - 10, "A and D change the level");
+        mvprintw(centerY + 9, centerX - 10, "ENTER starts, ESC quits");
+        refresh();
+
+        int key = getch();
+
+        if (key == 27) {
+            timeout(INPUT_WAIT_MS);
+            return 0;
+        }
+        else if (key == '\n' || key == '\r' || key == KEY_ENTER || key == ' ') {
+            break;
+        }
+        else if ((key == 'a' || key == 'A' || key == KEY_LEFT) && startLevel > 1) {
+            startLevel--;
+        }
+        else if ((key == 'd' || key == 'D' || key == KEY_RIGHT) && startLevel < MAX_START_LEVEL) {
+            startLevel++;
+        }
+    }
+
     timeout(INPUT_WAIT_MS);
+    return startLevel;
 }
 
 // Play one game from an empty board, putting the final score in finalScore
 // Returns true if the game ended with game over, false if the player quit with ESC
-bool playGame(int& finalScore) {
+bool playGame(int& finalScore, int startLevel) {
     // Start with an empty board
     for (int y = 0; y < BOARD_HEIGHT; y++) {
         for (int x = 0; x < BOARD_WIDTH; x++) {
@@ -621,7 +647,7 @@ bool playGame(int& finalScore) {
     // Game state
     int score = 0;
     int lines = 0;
-    int level = 1;
+    int level = startLevel;
     bool gameOver = false;
 
     // Time of the last automatic drop
@@ -760,7 +786,7 @@ bool playGame(int& finalScore) {
                 score += LINE_SCORES[cleared] * level;
 
                 // Go up a level every 10 lines
-                level = lines / 10 + 1;
+                level = startLevel + lines / 10;
             }
 
             // Spawn next piece
@@ -840,9 +866,15 @@ int main() {
         return 1;
     }
 
-    // Show title screen with the best score so far
+    // Show title screen with the best score so far, and let the player pick a level
     int highScore = loadHighScore();
-    showTitleScreen(highScore);
+    int startLevel = showTitleScreen(highScore);
+
+    // The player quit from the title screen
+    if (startLevel == 0) {
+        endwin();
+        return 0;
+    }
 
     // Center the board
     centerBoard();
@@ -854,7 +886,7 @@ int main() {
     bool playAgain = true;
     while (playAgain) {
         int score = 0;
-        bool gameOver = playGame(score);
+        bool gameOver = playGame(score, startLevel);
 
         // Only ask to play again if the game ended, not when the player quit with ESC
         if (gameOver) {

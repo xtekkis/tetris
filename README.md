@@ -21,6 +21,7 @@ A terminal-based Tetris game built with C++ and PDCurses.
 - Pause and resume
 - Next piece preview
 - Score, lines and level tracking
+- Choose a starting level from 1 to 10 on the title screen
 - Completed rows flash before they disappear
 - Multi-line clear scoring bonus
 - Best score saved between games
@@ -49,9 +50,12 @@ A terminal-based Tetris game built with C++ and PDCurses.
 | C | Hold piece |
 | P | Pause / resume |
 | R | Play again (after game over) |
+| Enter | Start the game (title screen) |
 | ESC | Quit |
 
 Controls work with Caps Lock on.
+
+On the title screen, A and D choose the starting level, from 1 to 10. Higher levels drop pieces faster and score more per line.
 
 ## Built With
 
