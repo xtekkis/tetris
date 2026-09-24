@@ -369,6 +369,17 @@ void drawControls() {
     mvprintw(controlsY + 12, controlsX, "+-----------+");
 }
 
+// Draw the board and all the panels, but not the falling piece
+void drawScreen(int score, int lines, int level) {
+    // erase() only redraws what changed, which avoids flicker
+    erase();
+    drawBoard();
+    drawStats(score, lines, level);
+    drawHold();
+    drawNextPiece();
+    drawControls();
+}
+
 // Check if the current shape can be at the given position
 bool isValidPosition(int posX, int posY) {
     for (int y = 0; y < 4; y++) {
@@ -675,15 +686,9 @@ bool playGame(int& finalScore, int startLevel) {
 
     while (!gameOver) {
         // Draw everything
-        // erase() only redraws what changed, which avoids flicker
-        erase();
-        drawBoard();
+        drawScreen(score, lines, level);
         drawGhost();
         drawPiece();
-        drawStats(score, lines, level);
-        drawHold();
-        drawNextPiece();
-        drawControls();
         refresh();
 
         // Handle input first
@@ -807,6 +812,13 @@ bool playGame(int& finalScore, int startLevel) {
             landed = false;
             lastDropTime = getTimeMs();
         }
+    }
+
+    // Draw the last board, so the piece that ended the game is visible
+    // behind the game over message
+    if (gameOver) {
+        drawScreen(score, lines, level);
+        refresh();
     }
 
     finalScore = score;
