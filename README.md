@@ -1,6 +1,6 @@
 # Tetris
 
-A terminal-based Tetris game built with C++ and PDCurses.
+A terminal-based Tetris game built with C++ and curses: PDCurses on Windows, ncurses in Docker.
 
 ## Preview
 

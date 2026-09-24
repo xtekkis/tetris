@@ -643,7 +643,7 @@ int showTitleScreen(int highScore) {
         mvprintw(centerY - 2, centerX - 10, "|      TETRIS       |");
         mvprintw(centerY - 1, centerX - 10, "|                   |");
         mvprintw(centerY, centerX - 10, "|   Built with C++  |");
-        mvprintw(centerY + 1, centerX - 10, "|    and PDCurses   |");
+        mvprintw(centerY + 1, centerX - 10, "|    and curses     |");
         mvprintw(centerY + 2, centerX - 10, "|                   |");
         mvprintw(centerY + 3, centerX - 10, "+-------------------+");
         mvprintw(centerY + 5, centerX - 10, "Best score: %d", highScore);
@@ -899,7 +899,7 @@ bool askPlayAgain(int score, int highScore, bool newBest) {
 }
 
 int main() {
-    // Initialize PDCurses
+    // Initialize curses
     initscr();
     raw();
     noecho();
