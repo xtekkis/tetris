@@ -193,6 +193,26 @@ void loadPiece(int piece) {
     copyShape(TETROMINOES[piece], currentShape);
 }
 
+// Check if the current shape can be at the given position
+bool isValidPosition(int posX, int posY) {
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (currentShape[y][x] == 1) {
+                int newX = posX + x;
+                int newY = posY + y;
+
+                // Check boundaries
+                if (newX < 0 || newX >= BOARD_WIDTH) return false;
+                if (newY >= BOARD_HEIGHT) return false;
+
+                // Check if cell is already occupied
+                if (newY >= 0 && board[newY][newX] != 0) return false;
+            }
+        }
+    }
+    return true;
+}
+
 // Refill the bag with all 7 pieces in a random order
 void fillBag() {
     for (int i = 0; i < PIECE_COUNT; i++) {
@@ -227,22 +247,38 @@ void holdPiece() {
         return;
     }
 
-    int previousHeld = heldPiece;
-    heldPiece = currentPiece;
+    // Work out which piece would come in
+    int incoming = nextPiece;
+    if (heldPiece != EMPTY_HOLD) {
+        incoming = heldPiece;
+    }
 
-    if (previousHeld == EMPTY_HOLD) {
-        // Nothing was held yet, so carry on with the next piece
-        currentPiece = nextPiece;
-        nextPiece = takePieceFromBag();
-    }
-    else {
-        currentPiece = previousHeld;
-    }
+    // Remember the current piece in case the swap does not fit
+    int backupShape[4][4];
+    copyShape(currentShape, backupShape);
+    int backupX = currentX;
+    int backupY = currentY;
 
     // The swapped in piece starts at the top again
     currentX = SPAWN_X;
     currentY = 0;
-    loadPiece(currentPiece);
+    loadPiece(incoming);
+
+    // If the stack is too high for it, leave everything as it was
+    if (!isValidPosition(currentX, currentY)) {
+        copyShape(backupShape, currentShape);
+        currentX = backupX;
+        currentY = backupY;
+        return;
+    }
+
+    if (heldPiece == EMPTY_HOLD) {
+        // Nothing was held yet, so carry on with the next piece
+        nextPiece = takePieceFromBag();
+    }
+
+    heldPiece = currentPiece;
+    currentPiece = incoming;
 
     holdUsed = true;
 }
@@ -378,26 +414,6 @@ void drawScreen(int score, int lines, int level) {
     drawHold();
     drawNextPiece();
     drawControls();
-}
-
-// Check if the current shape can be at the given position
-bool isValidPosition(int posX, int posY) {
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
-            if (currentShape[y][x] == 1) {
-                int newX = posX + x;
-                int newY = posY + y;
-
-                // Check boundaries
-                if (newX < 0 || newX >= BOARD_WIDTH) return false;
-                if (newY >= BOARD_HEIGHT) return false;
-
-                // Check if cell is already occupied
-                if (newY >= 0 && board[newY][newX] != 0) return false;
-            }
-        }
-    }
-    return true;
 }
 
 // Draw the current falling piece
