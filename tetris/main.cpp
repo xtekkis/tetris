@@ -544,23 +544,6 @@ void rotatePiece() {
     copyShape(backupShape, currentShape);
 }
 
-// Pause the game until P is pressed again
-// Returns true if the player pressed ESC to quit instead
-bool pauseGame() {
-    mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 3, "PAUSED");
-    refresh();
-
-    // Wait for P to resume or ESC to quit
-    timeout(-1);
-    int key = 0;
-    while (key != 'p' && key != 'P' && key != 27) {
-        key = getch();
-    }
-    timeout(INPUT_WAIT_MS);
-
-    return key == 27;
-}
-
 // Put the board in the middle of the terminal
 void centerBoard() {
     int termHeight, termWidth;
@@ -596,19 +579,48 @@ void handleResize() {
     centerBoard();
 }
 
+// Pause the game until P is pressed again
+// Returns true if the player pressed ESC to quit instead
+bool pauseGame() {
+    // Wait for P to resume or ESC to quit
+    timeout(-1);
+
+    while (true) {
+        mvprintw(BOARD_Y + BOARD_HEIGHT / 2, BOARD_X + BOARD_WIDTH - 3, "PAUSED");
+        refresh();
+
+        int key = getch();
+
+        if (key == 27) {
+            timeout(INPUT_WAIT_MS);
+            return true;
+        }
+        else if (key == 'p' || key == 'P') {
+            timeout(INPUT_WAIT_MS);
+            return false;
+        }
+        else if (key == KEY_RESIZE) {
+            // The board moves, so clear the old picture and show PAUSED in its new place
+            handleResize();
+            erase();
+        }
+    }
+}
+
 // Display title screen before the game starts
 // Returns the level to start on, or 0 if the player quit with ESC
 int showTitleScreen(int highScore) {
-    int termHeight, termWidth;
-    getmaxyx(stdscr, termHeight, termWidth);
-    int centerX = termWidth / 2;
-    int centerY = termHeight / 2;
-
     int startLevel = 1;
 
     // Wait for the player to choose a level and start
     timeout(-1);
     while (true) {
+        // Read the size every time, so the title stays centered after a resize
+        int termHeight, termWidth;
+        getmaxyx(stdscr, termHeight, termWidth);
+        int centerX = termWidth / 2;
+        int centerY = termHeight / 2;
+
         clear();
         mvprintw(centerY - 4, centerX - 10, "+-------------------+");
         mvprintw(centerY - 3, centerX - 10, "|                   |");
@@ -638,6 +650,9 @@ int showTitleScreen(int highScore) {
         }
         else if ((key == 'd' || key == 'D' || key == KEY_RIGHT) && startLevel < MAX_START_LEVEL) {
             startLevel++;
+        }
+        else if (key == KEY_RESIZE) {
+            handleResize();
         }
     }
 
@@ -828,31 +843,43 @@ bool playGame(int& finalScore, int startLevel) {
 // Show the game over message and wait for the player's choice
 // Returns true if the player wants to play again
 bool askPlayAgain(int score, int highScore, bool newBest) {
-    int centerY = BOARD_Y + BOARD_HEIGHT / 2;
-
-    mvprintw(centerY, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
-    mvprintw(centerY + 2, BOARD_X + BOARD_WIDTH - 6, "Score: %-6d", score);
-
-    if (newBest) {
-        mvprintw(centerY + 3, BOARD_X + BOARD_WIDTH - 6, "NEW BEST!   ");
-    }
-    else {
-        mvprintw(centerY + 3, BOARD_X + BOARD_WIDTH - 6, "Best: %-6d", highScore);
-    }
-
-    mvprintw(centerY + 5, BOARD_X + BOARD_WIDTH - 7, "R - Play again");
-    mvprintw(centerY + 6, BOARD_X + BOARD_WIDTH - 5, "ESC - Quit");
-    refresh();
-
     // Wait for R to play again or ESC to quit
     timeout(-1);
-    int key = 0;
-    while (key != 'r' && key != 'R' && key != 27) {
-        key = getch();
-    }
-    timeout(INPUT_WAIT_MS);
 
-    return key == 'r' || key == 'R';
+    while (true) {
+        int centerY = BOARD_Y + BOARD_HEIGHT / 2;
+
+        mvprintw(centerY, BOARD_X + BOARD_WIDTH - 5, "GAME OVER");
+        mvprintw(centerY + 2, BOARD_X + BOARD_WIDTH - 6, "Score: %-6d", score);
+
+        if (newBest) {
+            mvprintw(centerY + 3, BOARD_X + BOARD_WIDTH - 6, "NEW BEST!   ");
+        }
+        else {
+            mvprintw(centerY + 3, BOARD_X + BOARD_WIDTH - 6, "Best: %-6d", highScore);
+        }
+
+        mvprintw(centerY + 5, BOARD_X + BOARD_WIDTH - 7, "R - Play again");
+        mvprintw(centerY + 6, BOARD_X + BOARD_WIDTH - 5, "ESC - Quit");
+        refresh();
+
+        int key = getch();
+
+        if (key == 'r' || key == 'R') {
+            timeout(INPUT_WAIT_MS);
+            return true;
+        }
+        else if (key == 27) {
+            timeout(INPUT_WAIT_MS);
+            return false;
+        }
+        else if (key == KEY_RESIZE) {
+            // The board moves, so clear the old picture and draw it in its new place
+            handleResize();
+            erase();
+            drawBoard();
+        }
+    }
 }
 
 int main() {
