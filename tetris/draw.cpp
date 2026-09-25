@@ -63,7 +63,7 @@ void drawBoard() {
 }
 
 // Draw the stats panel to the left of the board
-void drawStats(int score, int lines, int level) {
+static void drawStats(int score, int lines, int level) {
     int statsX = BOARD_X - 14;
     int statsY = BOARD_Y;
 
@@ -82,7 +82,7 @@ void drawStats(int score, int lines, int level) {
 }
 
 // Draw the held piece panel below the stats panel
-void drawHold() {
+static void drawHold() {
     int holdX = BOARD_X - 14;
     int holdY = BOARD_Y + 13;
 
@@ -113,7 +113,7 @@ void drawHold() {
 }
 
 // Draw the next piece preview panel
-void drawNextPiece() {
+static void drawNextPiece() {
     int previewX = BOARD_X + BOARD_WIDTH * 2 + 4;
     int previewY = BOARD_Y;
 
@@ -140,7 +140,7 @@ void drawNextPiece() {
 }
 
 // Draw the controls panel below the next piece preview
-void drawControls() {
+static void drawControls() {
     int controlsX = BOARD_X + BOARD_WIDTH * 2 + 4;
     int controlsY = BOARD_Y + 9;
 

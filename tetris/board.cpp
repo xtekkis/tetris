@@ -188,7 +188,7 @@ void rotatePiece() {
 }
 
 // Refill the bag with all 7 pieces in a random order
-void fillBag() {
+static void fillBag() {
     for (int i = 0; i < PIECE_COUNT; i++) {
         bag[i] = i;
     }

@@ -25,7 +25,7 @@ const int HARD_DROP_POINTS = 2;
 const char HIGH_SCORE_FILE[] = "highscore.txt";
 
 // Read the best score from the save file, or 0 if there is none yet
-int loadHighScore() {
+static int loadHighScore() {
     std::ifstream file(HIGH_SCORE_FILE);
 
     int score = 0;
@@ -37,19 +37,19 @@ int loadHighScore() {
 
 // Save the best score. If the file cannot be written, for example on a
 // read only disk, the score is simply not saved.
-void saveHighScore(int score) {
+static void saveHighScore(int score) {
     std::ofstream file(HIGH_SCORE_FILE);
     file << score;
 }
 
 // Get the current time in milliseconds
-long long getTimeMs() {
+static long long getTimeMs() {
     using namespace std::chrono;
     return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
 
 // Get the time in milliseconds between automatic drops for a level
-int getDropInterval(int level) {
+static int getDropInterval(int level) {
     // Start at 500 ms and get 50 ms faster each level
     int interval = 500 - (level - 1) * 50;
 
@@ -62,7 +62,7 @@ int getDropInterval(int level) {
 
 // Play one game from an empty board, putting the final score in finalScore
 // Returns true if the game ended with game over, false if the player quit with ESC
-bool playGame(int& finalScore, int startLevel) {
+static bool playGame(int& finalScore, int startLevel) {
     // Start with an empty board
     clearBoard();
 
