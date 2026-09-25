@@ -64,6 +64,16 @@ On the title screen, A and D choose the starting level, from 1 to 10. Higher lev
 - ncurses (Docker / Linux build)
 - Docker
 
+## Project layout
+
+| File | What is in it |
+|---|---|
+| [tetris/game.h](tetris/game.h) | Shared settings, shared variables, and what each file provides |
+| [tetris/board.cpp](tetris/board.cpp) | The rules: where pieces fit, rotation, clearing lines, the piece bag, hold |
+| [tetris/draw.cpp](tetris/draw.cpp) | Everything drawn on screen: board, panels, ghost piece, line flash |
+| [tetris/screens.cpp](tetris/screens.cpp) | Title, pause and game over screens, and window resizing |
+| [tetris/main.cpp](tetris/main.cpp) | The game loop, scoring and the saved best score |
+
 ## How to Run
 
 Clone the repository first:
@@ -126,11 +136,11 @@ The game runs fine with all of them. `docker run -it --rm tetris` also works if 
 
 #### How the Docker build works
 
-PDCurses only works on Windows and Docker containers run Linux, so the Docker build uses **ncurses** instead. Both libraries provide the same `curses.h` functions, so `main.cpp` compiles without changes.
+PDCurses only works on Windows and Docker containers run Linux, so the Docker build uses **ncurses** instead. Both libraries provide the same `curses.h` functions, so the same source files compile on either one.
 
 The [Dockerfile](Dockerfile) builds the image in two stages:
 
-1. **build**: starts from the `gcc` image, installs the ncurses headers and compiles `main.cpp`.
+1. **build**: starts from the `gcc` image, installs the ncurses headers and compiles the source files.
 2. **runtime**: starts from a small `debian-slim` image, installs only the ncurses runtime library and copies in the compiled game. The compiler isn't included in this image, so the final image is much smaller.
 
 The [.dockerignore](.dockerignore) file keeps files the build doesn't need (git history, images, Visual Studio files) out of the build.

@@ -11,8 +11,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
-COPY tetris/main.cpp .
-RUN g++ -std=c++17 -O2 -Wall -o tetris main.cpp -lncurses
+COPY tetris/*.cpp tetris/*.h ./
+RUN g++ -std=c++17 -O2 -Wall -o tetris *.cpp -lncurses
 
 # ---------- Stage 2: runtime ----------
 # A small image that only contains the compiled game and the ncurses runtime library.
