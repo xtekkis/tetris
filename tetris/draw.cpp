@@ -9,6 +9,13 @@
 int BOARD_X = 12;
 int BOARD_Y = 1;
 
+// Where the side panels sit, measured from the top left corner of the board.
+// If these change, check MIN_TERM_WIDTH and MIN_TERM_HEIGHT in game.h still fit.
+const int LEFT_PANEL_OFFSET = 14;
+const int RIGHT_PANEL_OFFSET = BOARD_WIDTH * 2 + 4;
+const int HOLD_PANEL_ROW = 13;
+const int CONTROLS_PANEL_ROW = 9;
+
 // How many times completed rows blink before they disappear, and how long each step lasts
 const int FLASH_STEPS = 4;
 const int FLASH_STEP_MS = 60;
@@ -64,7 +71,7 @@ void drawBoard() {
 
 // Draw the stats panel to the left of the board
 static void drawStats(int score, int lines, int level) {
-    int statsX = BOARD_X - 14;
+    int statsX = BOARD_X - LEFT_PANEL_OFFSET;
     int statsY = BOARD_Y;
 
     mvprintw(statsY, statsX, "+----------+");
@@ -83,8 +90,8 @@ static void drawStats(int score, int lines, int level) {
 
 // Draw the held piece panel below the stats panel
 static void drawHold() {
-    int holdX = BOARD_X - 14;
-    int holdY = BOARD_Y + 13;
+    int holdX = BOARD_X - LEFT_PANEL_OFFSET;
+    int holdY = BOARD_Y + HOLD_PANEL_ROW;
 
     mvprintw(holdY, holdX, "+--------+");
     mvprintw(holdY + 1, holdX, "|  HOLD  |");
@@ -114,7 +121,7 @@ static void drawHold() {
 
 // Draw the next piece preview panel
 static void drawNextPiece() {
-    int previewX = BOARD_X + BOARD_WIDTH * 2 + 4;
+    int previewX = BOARD_X + RIGHT_PANEL_OFFSET;
     int previewY = BOARD_Y;
 
     mvprintw(previewY, previewX, "+--------+");
@@ -141,8 +148,8 @@ static void drawNextPiece() {
 
 // Draw the controls panel below the next piece preview
 static void drawControls() {
-    int controlsX = BOARD_X + BOARD_WIDTH * 2 + 4;
-    int controlsY = BOARD_Y + 9;
+    int controlsX = BOARD_X + RIGHT_PANEL_OFFSET;
+    int controlsY = BOARD_Y + CONTROLS_PANEL_ROW;
 
     mvprintw(controlsY, controlsX, "+-----------+");
     mvprintw(controlsY + 1, controlsX, "| CONTROLS  |");
