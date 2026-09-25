@@ -91,7 +91,7 @@ void drawHold() {
     mvprintw(holdY + 2, holdX, "+--------+");
 
     // Draw empty hold area
-    for (int y = 0; y < 4; y++) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
         mvprintw(holdY + 3 + y, holdX, "|        |");
     }
     mvprintw(holdY + 7, holdX, "+--------+");
@@ -102,8 +102,8 @@ void drawHold() {
     }
 
     attron(COLOR_PAIR(heldPiece + 1));
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
+        for (int x = 0; x < SHAPE_SIZE; x++) {
             if (TETROMINOES[heldPiece][y][x] == 1) {
                 mvprintw(holdY + 3 + y, holdX + 1 + x * 2, "[]");
             }
@@ -122,15 +122,15 @@ void drawNextPiece() {
     mvprintw(previewY + 2, previewX, "+--------+");
 
     // Draw empty preview area
-    for (int y = 0; y < 4; y++) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
         mvprintw(previewY + 3 + y, previewX, "|        |");
     }
     mvprintw(previewY + 7, previewX, "+--------+");
 
     // Draw the next piece centered inside the box
     attron(COLOR_PAIR(nextPiece + 1));
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
+        for (int x = 0; x < SHAPE_SIZE; x++) {
             if (TETROMINOES[nextPiece][y][x] == 1) {
                 mvprintw(previewY + 3 + y, previewX + 1 + x * 2, "[]");
             }
@@ -173,8 +173,8 @@ void drawScreen(int score, int lines, int level) {
 // Draw the current falling piece
 void drawPiece() {
     attron(COLOR_PAIR(currentPiece + 1));
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
+        for (int x = 0; x < SHAPE_SIZE; x++) {
             if (currentShape[y][x] == 1) {
                 int screenX = BOARD_X + (currentX + x) * 2;
                 int screenY = BOARD_Y + currentY + y;
@@ -197,8 +197,8 @@ void drawGhost() {
     if (ghostY == currentY) return;
 
     // Draw ghost with different character
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
+        for (int x = 0; x < SHAPE_SIZE; x++) {
             if (currentShape[y][x] == 1) {
                 int screenX = BOARD_X + (currentX + x) * 2;
                 int screenY = BOARD_Y + ghostY + y;

@@ -9,7 +9,7 @@ int board[BOARD_HEIGHT][BOARD_WIDTH] = { 0 };
 
 // The 7 tetromino shapes
 // 1 = block, 0 = empty
-const int TETROMINOES[PIECE_COUNT][4][4] = {
+const int TETROMINOES[PIECE_COUNT][SHAPE_SIZE][SHAPE_SIZE] = {
     // I piece
     {
         {0, 0, 0, 0},
@@ -73,7 +73,7 @@ int currentX = SPAWN_X;
 int currentY = 0;
 
 // Active piece shape
-int currentShape[4][4];
+int currentShape[SHAPE_SIZE][SHAPE_SIZE];
 
 // The pieces still to come, dealt 7 at a time in a random order
 static int bag[PIECE_COUNT];
@@ -82,9 +82,9 @@ static int bag[PIECE_COUNT];
 static int bagIndex = PIECE_COUNT;
 
 // Copy one 4x4 shape into another
-void copyShape(const int from[4][4], int to[4][4]) {
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+void copyShape(const int from[SHAPE_SIZE][SHAPE_SIZE], int to[SHAPE_SIZE][SHAPE_SIZE]) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
+        for (int x = 0; x < SHAPE_SIZE; x++) {
             to[y][x] = from[y][x];
         }
     }
@@ -97,8 +97,8 @@ void loadPiece(int piece) {
 
 // Check if the current shape can be at the given position
 bool isValidPosition(int posX, int posY) {
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < SHAPE_SIZE; y++) {
+        for (int x = 0; x < SHAPE_SIZE; x++) {
             if (currentShape[y][x] == 1) {
                 int newX = posX + x;
                 int newY = posY + y;
@@ -160,17 +160,17 @@ int clearLines() {
 
 // Rotate the current shape 90 degrees clockwise
 void rotatePiece() {
-    int temp[4][4] = { 0 };
+    int temp[SHAPE_SIZE][SHAPE_SIZE] = { 0 };
 
     // Transpose and reverse to rotate clockwise
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
-            temp[x][3 - y] = currentShape[y][x];
+    for (int y = 0; y < SHAPE_SIZE; y++) {
+        for (int x = 0; x < SHAPE_SIZE; x++) {
+            temp[x][SHAPE_SIZE - 1 - y] = currentShape[y][x];
         }
     }
 
     // Keep a copy of the old shape, then apply the rotation
-    int backupShape[4][4];
+    int backupShape[SHAPE_SIZE][SHAPE_SIZE];
     copyShape(currentShape, backupShape);
     copyShape(temp, currentShape);
 
@@ -233,7 +233,7 @@ void holdPiece() {
     }
 
     // Remember the current piece in case the swap does not fit
-    int backupShape[4][4];
+    int backupShape[SHAPE_SIZE][SHAPE_SIZE];
     copyShape(currentShape, backupShape);
     int backupX = currentX;
     int backupY = currentY;

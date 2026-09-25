@@ -184,8 +184,8 @@ bool playGame(int& finalScore, int startLevel) {
         // Lock the piece after a hard drop, or once it has rested for the lock delay
         if (hardDropped || (landed && now - landedTime >= LOCK_DELAY_MS)) {
             // Place piece on board
-            for (int y = 0; y < 4; y++) {
-                for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < SHAPE_SIZE; y++) {
+                for (int x = 0; x < SHAPE_SIZE; x++) {
                     if (currentShape[y][x] == 1) {
                         board[currentY + y][currentX + x] = currentPiece + 1;
                     }

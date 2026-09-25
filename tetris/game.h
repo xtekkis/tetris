@@ -14,6 +14,9 @@ const int BOARD_HEIGHT = 20;
 // Number of different pieces
 const int PIECE_COUNT = 7;
 
+// Piece shapes are stored in a 4 by 4 grid
+const int SHAPE_SIZE = 4;
+
 // Column a new piece starts in
 const int SPAWN_X = 3;
 
@@ -37,7 +40,7 @@ extern int board[BOARD_HEIGHT][BOARD_WIDTH];
 
 // The 7 tetromino shapes
 // 1 = block, 0 = empty
-extern const int TETROMINOES[PIECE_COUNT][4][4];
+extern const int TETROMINOES[PIECE_COUNT][SHAPE_SIZE][SHAPE_SIZE];
 
 // Current piece state
 extern int currentPiece;
@@ -51,7 +54,7 @@ extern int currentX;
 extern int currentY;
 
 // Active piece shape
-extern int currentShape[4][4];
+extern int currentShape[SHAPE_SIZE][SHAPE_SIZE];
 
 // Where the board is drawn, created in draw.cpp
 extern int BOARD_X;
@@ -61,7 +64,7 @@ extern int BOARD_Y;
 // board.cpp: the rules
 // ---------------------------------------------------------------------------
 
-void copyShape(const int from[4][4], int to[4][4]);
+void copyShape(const int from[SHAPE_SIZE][SHAPE_SIZE], int to[SHAPE_SIZE][SHAPE_SIZE]);
 void loadPiece(int piece);
 bool isValidPosition(int posX, int posY);
 void clearBoard();
