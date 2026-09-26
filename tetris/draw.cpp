@@ -88,62 +88,43 @@ static void drawStats(int score, int lines, int level) {
     mvprintw(statsY + 11, statsX, "+----------+");
 }
 
-// Draw the held piece panel below the stats panel
-static void drawHold() {
-    int holdX = BOARD_X - LEFT_PANEL_OFFSET;
-    int holdY = BOARD_Y + HOLD_PANEL_ROW;
+// Draw a panel with a title and a piece inside it, used for HOLD and NEXT.
+// Pass EMPTY_HOLD as the piece to leave the box empty.
+static void drawPiecePanel(int panelY, int panelX, const char* title, int piece) {
+    mvprintw(panelY, panelX, "+--------+");
+    mvprintw(panelY + 1, panelX, "|%s|", title);
+    mvprintw(panelY + 2, panelX, "+--------+");
 
-    mvprintw(holdY, holdX, "+--------+");
-    mvprintw(holdY + 1, holdX, "|  HOLD  |");
-    mvprintw(holdY + 2, holdX, "+--------+");
-
-    // Draw empty hold area
+    // The box is as tall as a piece shape
     for (int y = 0; y < SHAPE_SIZE; y++) {
-        mvprintw(holdY + 3 + y, holdX, "|        |");
+        mvprintw(panelY + 3 + y, panelX, "|        |");
     }
-    mvprintw(holdY + 7, holdX, "+--------+");
+    mvprintw(panelY + 3 + SHAPE_SIZE, panelX, "+--------+");
 
-    // Nothing to show until the player holds a piece
-    if (heldPiece == EMPTY_HOLD) {
+    // Nothing to show before the player holds a piece
+    if (piece == EMPTY_HOLD) {
         return;
     }
 
-    attron(COLOR_PAIR(heldPiece + 1));
+    attron(COLOR_PAIR(piece + 1));
     for (int y = 0; y < SHAPE_SIZE; y++) {
         for (int x = 0; x < SHAPE_SIZE; x++) {
-            if (TETROMINOES[heldPiece][y][x] == 1) {
-                mvprintw(holdY + 3 + y, holdX + 1 + x * 2, "[]");
+            if (TETROMINOES[piece][y][x] == 1) {
+                mvprintw(panelY + 3 + y, panelX + 1 + x * 2, "[]");
             }
         }
     }
-    attroff(COLOR_PAIR(heldPiece + 1));
+    attroff(COLOR_PAIR(piece + 1));
+}
+
+// Draw the held piece panel below the stats panel
+static void drawHold() {
+    drawPiecePanel(BOARD_Y + HOLD_PANEL_ROW, BOARD_X - LEFT_PANEL_OFFSET, "  HOLD  ", heldPiece);
 }
 
 // Draw the next piece preview panel
 static void drawNextPiece() {
-    int previewX = BOARD_X + RIGHT_PANEL_OFFSET;
-    int previewY = BOARD_Y;
-
-    mvprintw(previewY, previewX, "+--------+");
-    mvprintw(previewY + 1, previewX, "|  NEXT  |");
-    mvprintw(previewY + 2, previewX, "+--------+");
-
-    // Draw empty preview area
-    for (int y = 0; y < SHAPE_SIZE; y++) {
-        mvprintw(previewY + 3 + y, previewX, "|        |");
-    }
-    mvprintw(previewY + 7, previewX, "+--------+");
-
-    // Draw the next piece centered inside the box
-    attron(COLOR_PAIR(nextPiece + 1));
-    for (int y = 0; y < SHAPE_SIZE; y++) {
-        for (int x = 0; x < SHAPE_SIZE; x++) {
-            if (TETROMINOES[nextPiece][y][x] == 1) {
-                mvprintw(previewY + 3 + y, previewX + 1 + x * 2, "[]");
-            }
-        }
-    }
-    attroff(COLOR_PAIR(nextPiece + 1));
+    drawPiecePanel(BOARD_Y, BOARD_X + RIGHT_PANEL_OFFSET, "  NEXT  ", nextPiece);
 }
 
 // Draw the controls panel below the next piece preview
